@@ -8,13 +8,13 @@ lib_LTLIBRARIES = libcdr-@CDR_MAJOR_VERSION@.@CDR_MINOR_VERSION@.la
 libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_includedir = $(includedir)/libcdr-@CDR_MAJOR_VERSION@.@CDR_MINOR_VERSION@/libcdr
 libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_include_HEADERS = \
 	$(top_srcdir)/inc/libcdr/libcdr.h \
+	$(top_srcdir)/inc/libcdr/libcdr_api.h \
 	$(top_srcdir)/inc/libcdr/CDRDocument.h \
-	$(top_srcdir)/inc/libcdr/CDRStringVector.h \
 	$(top_srcdir)/inc/libcdr/CMXDocument.h
 
-AM_CXXFLAGS = -I$(top_srcdir)/inc $(WPD_CFLAGS) $(WPG_CFLAGS) $(LCMS2_CFLAGS) $(ZLIB_CFLAGS) $(ICU_CFLAGS) $(DEBUG_CXXFLAGS)
+AM_CXXFLAGS = -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(LCMS2_CFLAGS) $(ZLIB_CFLAGS) $(ICU_CFLAGS) $(DEBUG_CXXFLAGS) -DLIBCDR_BUILD=1
 
-libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_LIBADD  = $(WPD_LIBS) $(LCMS2_LIBS) $(ZLIB_LIBS) $(ICU_LIBS) @LIBCDR_WIN32_RESOURCE@
+libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) $(LCMS2_LIBS) $(ZLIB_LIBS) $(ICU_LIBS) @LIBCDR_WIN32_RESOURCE@
 libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_DEPENDENCIES = @LIBCDR_WIN32_RESOURCE@
 libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic -no-undefined
 libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_SOURCES = \
@@ -25,12 +25,9 @@ libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_SOURCES = \
 	CDROutputElementList.cpp \
 	CDRParser.cpp \
 	CDRPath.cpp \
-	CDRStringVector.cpp \
 	CDRStylesCollector.cpp \
-	CDRSVGGenerator.cpp \
 	CDRTransforms.cpp \
 	CDRTypes.cpp \
-	CDRZipStream.cpp \
 	CMXDocument.cpp \
 	CMXParser.cpp \
 	CommonParser.cpp \
@@ -45,10 +42,8 @@ libcdr_@CDR_MAJOR_VERSION@_@CDR_MINOR_VERSION@_la_SOURCES = \
 	CDRParser.h \
 	CDRPath.h \
 	CDRStylesCollector.h \
-	CDRSVGGenerator.h \
 	CDRTransforms.h \
 	CDRTypes.h \
-	CDRZipStream.h \
 	CMXDocumentStructure.h \
 	CMXParser.h \
 	CommonParser.h \

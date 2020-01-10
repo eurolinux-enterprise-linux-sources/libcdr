@@ -1,30 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #include <math.h>
@@ -89,7 +69,7 @@ void libcdr::CDRParserState::setColorTransform(const std::vector<unsigned char> 
   cmsCloseProfile(tmpRGBProfile);
 }
 
-void libcdr::CDRParserState::setColorTransform(WPXInputStream *input)
+void libcdr::CDRParserState::setColorTransform(librevenge::RVNGInputStream *input)
 {
   if (!input)
     return;
@@ -454,7 +434,7 @@ unsigned libcdr::CDRParserState::_getRGBColor(const CDRColor &color)
 
     if (hue < 120)
     {
-      satRed =  (double)(120 - hue) / 60.0;
+      satRed = (double)(120 - hue) / 60.0;
       satGreen = (double)hue/60.0;
       satBlue = 0.0;
     }
@@ -497,6 +477,55 @@ unsigned libcdr::CDRParserState::_getRGBColor(const CDRColor &color)
     blue = col0;
     break;
   }
+  // YIQ255
+  case 0x0b:
+  {
+    double y = (double)col0;
+    double i = (double)col1;
+    double q = (double)col2;
+
+    y -= 100.0;
+    if (y < 0.0)
+      y /= 100.0;
+    else
+      y /= 155.0;
+    y *= 0.5;
+    y += 0.5;
+
+    i -= 100.0;
+    if (i <= 0.0)
+      i /= 100.0;
+    else
+      i /= 155;
+    i *= 0.5957;
+
+    q -= 100.0;
+    if (q <= 0)
+      q /= 100.0;
+    else
+      q /= 155;
+    q *= 0.5226;
+
+    double RR = y + 0.9563*i + 0.6210*q;
+    double GG = y - 0.2127*i - 0.6474*q;
+    double BB = y - 1.1070*i + 1.7046*q;
+    if (RR > 1.0)
+      RR = 1.0;
+    if (RR < 0.0)
+      RR = 0.0;
+    if (GG > 1.0)
+      GG = 1.0;
+    if (GG < 0.0)
+      GG = 0.0;
+    if (BB > 1.0)
+      BB = 1.0;
+    if (BB < 0.0)
+      BB = 0.0;
+    red = (unsigned char)cdr_round(255*RR);
+    green = (unsigned char)cdr_round(255*GG);
+    blue = (unsigned char)cdr_round(255*BB);
+    break;
+  }
   // Lab
   case 0x0c:
   {
@@ -531,9 +560,9 @@ unsigned libcdr::CDRParserState::_getRGBColor(const CDRColor &color)
   return (unsigned)((red << 16) | (green << 8) | blue);
 }
 
-WPXString libcdr::CDRParserState::getRGBColorString(const libcdr::CDRColor &color)
+librevenge::RVNGString libcdr::CDRParserState::getRGBColorString(const libcdr::CDRColor &color)
 {
-  WPXString tempString;
+  librevenge::RVNGString tempString;
   tempString.sprintf("#%.6x", _getRGBColor(color));
   return tempString;
 }

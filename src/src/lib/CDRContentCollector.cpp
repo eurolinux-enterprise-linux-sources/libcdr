@@ -1,36 +1,16 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #include <math.h>
 #include <string.h>
+#include <librevenge/librevenge.h>
 #include <libcdr/libcdr.h>
-#include "CDRSVGGenerator.h"
 #include "CDRContentCollector.h"
 #include "CDRInternalStream.h"
 #include "libcdr_utils.h"
@@ -47,8 +27,8 @@
 #define DUMP_VECT 0
 #endif
 
-libcdr::CDRContentCollector::CDRContentCollector(libcdr::CDRParserState &ps, libwpg::WPGPaintInterface *painter) :
-  m_painter(painter),
+libcdr::CDRContentCollector::CDRContentCollector(libcdr::CDRParserState &ps, librevenge::RVNGDrawingInterface *painter) :
+  m_painter(painter), m_isDocumentStarted(false),
   m_isPageProperties(false), m_isPageStarted(false), m_ignorePage(false),
   m_page(ps.m_pages[0]), m_pageIndex(0), m_currentFillStyle(), m_currentLineStyle(), m_spnd(0),
   m_currentObjectLevel(0), m_currentGroupLevel(0), m_currentVectLevel(0), m_currentPageLevel(0),
@@ -64,20 +44,43 @@ libcdr::CDRContentCollector::~CDRContentCollector()
 {
   if (m_isPageStarted)
     _endPage();
+  if (m_isDocumentStarted)
+    _endDocument();
+}
+
+void libcdr::CDRContentCollector::_startDocument()
+{
+  if (m_isDocumentStarted)
+    return;
+  librevenge::RVNGPropertyList propList;
+  if (m_painter)
+    m_painter->startDocument(propList);
+  m_isDocumentStarted = true;
+}
+
+void libcdr::CDRContentCollector::_endDocument()
+{
+  if (!m_isDocumentStarted)
+    return;
+  if (m_isPageStarted)
+    _endPage();
+  if (m_painter)
+    m_painter->endDocument();
+  m_isDocumentStarted = false;
 }
 
 void libcdr::CDRContentCollector::_startPage(double width, double height)
 {
   if (m_ignorePage)
     return;
-  WPXPropertyList propList;
+  if (!m_isDocumentStarted)
+    _startDocument();
+  librevenge::RVNGPropertyList propList;
   propList.insert("svg:width", width);
   propList.insert("svg:height", height);
   if (m_painter)
-  {
-    m_painter->startGraphics(propList);
-    m_isPageStarted = true;
-  }
+    m_painter->startPage(propList);
+  m_isPageStarted = true;
 }
 
 void libcdr::CDRContentCollector::_endPage()
@@ -90,7 +93,7 @@ void libcdr::CDRContentCollector::_endPage()
     m_contentOutputElements.pop();
   }
   if (m_painter)
-    m_painter->endGraphics();
+    m_painter->endPage();
   m_isPageStarted = false;
 }
 
@@ -117,7 +120,7 @@ void libcdr::CDRContentCollector::collectGroup(unsigned level)
 {
   if (!m_isPageStarted && !m_currentVectLevel && !m_ignorePage)
     _startPage(m_page.width, m_page.height);
-  WPXPropertyList propList;
+  librevenge::RVNGPropertyList propList;
   CDROutputElementList outputElement;
   // Since the CDR objects are drawn in reverse order, reverse the logic of groups too
   outputElement.addEndGroup();
@@ -153,45 +156,15 @@ void libcdr::CDRContentCollector::collectOtherList()
 //  m_isPageProperties = false;
 }
 
-void libcdr::CDRContentCollector::collectCubicBezier(double x1, double y1, double x2, double y2, double x, double y)
+void libcdr::CDRContentCollector::collectPath(const CDRPath &path)
 {
-  CDR_DEBUG_MSG(("CDRContentCollector::collectCubicBezier(%f, %f, %f, %f, %f, %f)\n", x1, y1, x2, y2, x, y));
-  m_currentPath.appendCubicBezierTo(x1, y1, x2, y2, x, y);
-}
-
-void libcdr::CDRContentCollector::collectQuadraticBezier(double x1, double y1, double x, double y)
-{
-  CDR_DEBUG_MSG(("CDRContentCollector::collectQuadraticBezier(%f, %f, %f, %f)\n", x1, y1, x, y));
-  m_currentPath.appendQuadraticBezierTo(x1, y1, x, y);
-}
-
-void libcdr::CDRContentCollector::collectMoveTo(double x, double y)
-{
-  CDR_DEBUG_MSG(("CDRContentCollector::collectMoveTo(%f, %f)\n", x, y));
-  m_currentPath.appendMoveTo(x,y);
-}
-
-void libcdr::CDRContentCollector::collectLineTo(double x, double y)
-{
-  CDR_DEBUG_MSG(("CDRContentCollector::collectLineTo(%f, %f)\n", x, y));
-  m_currentPath.appendLineTo(x, y);
-}
-
-void libcdr::CDRContentCollector::collectArcTo(double rx, double ry, bool largeArc, bool sweep, double x, double y)
-{
-  CDR_DEBUG_MSG(("CDRContentCollector::collectArcTo(%f, %f)\n", x, y));
-  m_currentPath.appendArcTo(rx, ry, 0.0, largeArc, sweep, x, y);
-}
-
-void libcdr::CDRContentCollector::collectClosePath()
-{
-  CDR_DEBUG_MSG(("CDRContentCollector::collectClosePath\n"));
-  m_currentPath.appendClosePath();
+  CDR_DEBUG_MSG(("CDRContentCollector::collectPath\n"));
+  m_currentPath.appendPath(path);
 }
 
 void libcdr::CDRContentCollector::_flushCurrentPath()
 {
-  CDR_DEBUG_MSG(("CDRContentCollector::collectFlushPath\n"));
+  CDR_DEBUG_MSG(("CDRContentCollector::_flushCurrentPath\n"));
   CDROutputElementList outputElement;
   if (!m_currentPath.empty() || (!m_splineData.empty() && m_isInSpline))
   {
@@ -215,11 +188,10 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     double previousY = 0.0;
     double x = 0.0;
     double y = 0.0;
-    WPXPropertyList style;
-    WPXPropertyListVector gradient;
-    _fillProperties(style, gradient);
+    librevenge::RVNGPropertyList style;
+    _fillProperties(style);
     _lineProperties(style);
-    outputElement.addStyle(style, gradient);
+    outputElement.addStyle(style);
     m_currentPath.transform(m_currentTransforms);
     if (!m_groupTransforms.empty())
       m_currentPath.transform(m_groupTransforms.top());
@@ -228,17 +200,17 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     tmpTrafo = CDRTransform(1.0, 0.0, 0.0, 0.0, -1.0, m_page.height);
     m_currentPath.transform(tmpTrafo);
 
-    std::vector<WPXPropertyList> tmpPath;
+    std::vector<librevenge::RVNGPropertyList> tmpPath;
 
-    WPXPropertyListVector path;
+    librevenge::RVNGPropertyListVector path;
     m_currentPath.writeOut(path);
 
     bool isPathClosed = m_currentPath.isClosed();
 
-    WPXPropertyListVector::Iter i(path);
+    librevenge::RVNGPropertyListVector::Iter i(path);
     for (i.rewind(); i.next();)
     {
-      if (!i()["libwpg:path-action"])
+      if (!i()["librevenge:path-action"])
         continue;
       if (i()["svg:x"] && i()["svg:y"])
       {
@@ -252,7 +224,7 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
           firstPoint = false;
           wasMove = true;
         }
-        else if (i()["libwpg:path-action"]->getStr() == "M")
+        else if (i()["librevenge:path-action"]->getStr() == "M")
         {
           // This is needed for a good generation of path from polygon
           if (CDR_ALMOST_ZERO(previousX - x) && CDR_ALMOST_ZERO(previousY - y))
@@ -265,15 +237,13 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
               {
                 if ((CDR_ALMOST_ZERO(initialX - previousX) && CDR_ALMOST_ZERO(initialY - previousY)) || isPathClosed)
                 {
-                  WPXPropertyList node;
-                  node.insert("libwpg:path-action", "Z");
+                  librevenge::RVNGPropertyList node;
+                  node.insert("librevenge:path-action", "Z");
                   tmpPath.push_back(node);
                 }
               }
               else
-              {
                 tmpPath.pop_back();
-              }
             }
           }
 
@@ -296,6 +266,11 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
         }
 
       }
+      else if (i()["librevenge:path-action"]->getStr() == "Z")
+      {
+        if (tmpPath.back()["librevenge:path-action"] && tmpPath.back()["librevenge:path-action"]->getStr() != "Z")
+          tmpPath.push_back(i());
+      }
     }
     if (!tmpPath.empty())
     {
@@ -303,9 +278,12 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
       {
         if ((CDR_ALMOST_ZERO(initialX - previousX) && CDR_ALMOST_ZERO(initialY - previousY)) || isPathClosed)
         {
-          WPXPropertyList closedPath;
-          closedPath.insert("libwpg:path-action", "Z");
-          tmpPath.push_back(closedPath);
+          if (tmpPath.back()["librevenge:path-action"] && tmpPath.back()["librevenge:path-action"]->getStr() != "Z")
+          {
+            librevenge::RVNGPropertyList closedPath;
+            closedPath.insert("librevenge:path-action", "Z");
+            tmpPath.push_back(closedPath);
+          }
         }
       }
       else
@@ -313,11 +291,12 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     }
     if (!tmpPath.empty())
     {
-      WPXPropertyListVector outputPath;
-      for (std::vector<WPXPropertyList>::const_iterator iter = tmpPath.begin(); iter != tmpPath.end(); ++iter)
+      librevenge::RVNGPropertyListVector outputPath;
+      for (std::vector<librevenge::RVNGPropertyList>::const_iterator iter = tmpPath.begin(); iter != tmpPath.end(); ++iter)
         outputPath.append(*iter);
-
-      outputElement.addPath(outputPath);
+      librevenge::RVNGPropertyList propList;
+      propList.insert("svg:d", outputPath);
+      outputElement.addPath(propList);
 
     }
     m_currentPath.clear();
@@ -360,7 +339,7 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     double height = sqrt((corner2x - corner1x)*(corner2x - corner1x) + (corner2y - corner1y)*(corner2y - corner1y));
     double rotate = atan2(corner3y-corner2y, corner3x-corner2x);
 
-    WPXPropertyList propList;
+    librevenge::RVNGPropertyList propList;
 
     propList.insert("svg:x", cx - width / 2.0);
     propList.insert("svg:width", width);
@@ -384,11 +363,11 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
       rotate -= 2.0*M_PI;
 
     if (rotate != 0.0)
-      propList.insert("libwpg:rotate", rotate * 180 / M_PI, WPX_GENERIC);
+      propList.insert("librevenge:rotate", rotate * 180 / M_PI, librevenge::RVNG_GENERIC);
 
-    propList.insert("libwpg:mime-type", "image/bmp");
-
-    outputElement.addGraphicObject(propList, m_currentImage.getImage());
+    propList.insert("librevenge:mime-type", "image/bmp");
+    propList.insert("office:binary-data", m_currentImage.getImage());
+    outputElement.addGraphicObject(propList);
   }
   if (m_currentText && !m_currentText->empty())
   {
@@ -438,7 +417,7 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     if (y1 > y2)
       std::swap(y1, y2);
 
-    WPXPropertyList textFrameProps;
+    librevenge::RVNGPropertyList textFrameProps;
     textFrameProps.insert("svg:width", fabs(x2-x1));
     textFrameProps.insert("svg:height", fabs(y2-y1));
     textFrameProps.insert("svg:x", x1);
@@ -447,10 +426,10 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     textFrameProps.insert("fo:padding-bottom", 0.0);
     textFrameProps.insert("fo:padding-left", 0.0);
     textFrameProps.insert("fo:padding-right", 0.0);
-    outputElement.addStartTextObject(textFrameProps, WPXPropertyListVector());
+    outputElement.addStartTextObject(textFrameProps);
     for (unsigned i = 0; i < m_currentText->size(); ++i)
     {
-      WPXPropertyList paraProps;
+      librevenge::RVNGPropertyList paraProps;
       bool rtl = false;
       switch ((*m_currentText)[i].m_line[0].m_charStyle.m_align)
       {
@@ -482,21 +461,21 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
 //      paraProps.insert("fo:text-indent", (*m_currentText)[i].m_charStyle.m_firstIndent);
 //      paraProps.insert("fo:margin-left", (*m_currentText)[i].m_charStyle.m_leftIndent);
 //      paraProps.insert("fo:margin-right", (*m_currentText)[i].m_charStyle.m_rightIndent);
-      outputElement.addStartTextLine(paraProps);
+      outputElement.addOpenParagraph(paraProps);
       for (unsigned j = 0; j < (*m_currentText)[i].m_line.size(); ++j)
       {
-        WPXPropertyList spanProps;
+        librevenge::RVNGPropertyList spanProps;
         double fontSize = (double)cdr_round(144.0*(*m_currentText)[i].m_line[j].m_charStyle.m_fontSize) / 2.0;
-        spanProps.insert("fo:font-size", fontSize, WPX_POINT);
+        spanProps.insert("fo:font-size", fontSize, librevenge::RVNG_POINT);
         if ((*m_currentText)[i].m_line[j].m_charStyle.m_fontName.len())
           spanProps.insert("style:font-name", (*m_currentText)[i].m_line[j].m_charStyle.m_fontName);
         if ((*m_currentText)[i].m_line[j].m_charStyle.m_fillStyle.fillType != (unsigned short)-1)
           spanProps.insert("fo:color", m_ps.getRGBColorString((*m_currentText)[i].m_line[j].m_charStyle.m_fillStyle.color1));
-        outputElement.addStartTextSpan(spanProps);
+        outputElement.addOpenSpan(spanProps);
         outputElement.addInsertText((*m_currentText)[i].m_line[j].m_text);
-        outputElement.addEndTextSpan();
+        outputElement.addCloseSpan();
       }
-      outputElement.addEndTextLine();
+      outputElement.addCloseParagraph();
     }
     outputElement.addEndTextObject();
   }
@@ -531,7 +510,7 @@ void libcdr::CDRContentCollector::collectLevel(unsigned level)
   }
   while (!m_groupLevels.empty() && level <= m_groupLevels.top())
   {
-    WPXPropertyList propList;
+    librevenge::RVNGPropertyList propList;
     CDROutputElementList outputElement;
     // since the CDR objects are drawn in reverse order, reverse group marks too
     outputElement.addStartGroup(propList);
@@ -541,28 +520,28 @@ void libcdr::CDRContentCollector::collectLevel(unsigned level)
   }
   if (m_currentVectLevel && m_spnd && m_groupLevels.empty() && !m_fillOutputElements.empty())
   {
-    CDRStringVector svgOutput;
-    CDRSVGGenerator generator(svgOutput);
-    WPXPropertyList propList;
+    librevenge::RVNGStringVector svgOutput;
+    librevenge::RVNGSVGDrawingGenerator generator(svgOutput, "");
+    librevenge::RVNGPropertyList propList;
     propList.insert("svg:width", m_page.width);
     propList.insert("svg:height", m_page.height);
-    generator.startGraphics(propList);
+    generator.startPage(propList);
     while (!m_fillOutputElements.empty())
     {
       m_fillOutputElements.top().draw(&generator);
       m_fillOutputElements.pop();
     }
-    generator.endGraphics();
+    generator.endPage();
     if (!svgOutput.empty())
     {
       const char *header =
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-      WPXBinaryData output((const unsigned char *)header, strlen(header));
+      librevenge::RVNGBinaryData output((const unsigned char *)header, strlen(header));
       output.append((unsigned char *)svgOutput[0].cstr(), strlen(svgOutput[0].cstr()));
       m_ps.m_vects[m_spnd] = output;
     }
 #if DUMP_VECT
-    WPXString filename;
+    librevenge::RVNGString filename;
     filename.sprintf("vect%.8x.svg", m_spnd);
     FILE *f = fopen(filename.cstr(), "wb");
     if (f)
@@ -598,10 +577,10 @@ void libcdr::CDRContentCollector::collectFillStyle(unsigned short fillType, cons
 }
 
 void libcdr::CDRContentCollector::collectLineStyle(unsigned short lineType, unsigned short capsType, unsigned short joinType, double lineWidth,
-    double stretch, double angle, const CDRColor &color, const std::vector<unsigned> &dashArray,
-    unsigned startMarkerId, unsigned endMarkerId)
+                                                   double stretch, double angle, const CDRColor &color, const std::vector<unsigned> &dashArray,
+                                                   const CDRPath &startMarker, const CDRPath &endMarker)
 {
-  m_currentLineStyle = CDRLineStyle(lineType, capsType, joinType, lineWidth, stretch, angle, color, dashArray, startMarkerId, endMarkerId);
+  m_currentLineStyle = CDRLineStyle(lineType, capsType, joinType, lineWidth, stretch, angle, color, dashArray, startMarker, endMarker);
 }
 
 void libcdr::CDRContentCollector::collectRotate(double angle, double cx, double cy)
@@ -631,10 +610,10 @@ void libcdr::CDRContentCollector::collectPolygonTransform(unsigned numAngles, un
   m_polygon = new CDRPolygon(numAngles, nextPoint, rx, ry, cx, cy);
 }
 
-void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPXPropertyListVector &vec)
+void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &propList)
 {
   if (m_fillOpacity < 1.0)
-    propList.insert("draw:opacity", m_fillOpacity, WPX_PERCENT);
+    propList.insert("draw:opacity", m_fillOpacity, librevenge::RVNG_PERCENT);
   if (m_currentFillStyle.fillType == 0)
     propList.insert("draw:fill", "none");
   else
@@ -681,19 +660,19 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
             while (angle > 360.0)
               angle -= 360.0;
             propList.insert("draw:angle", (int)angle);
-            propList.insert("draw:border", (double)(m_currentFillStyle.gradient.m_edgeOffset)/100.0, WPX_PERCENT);
+            propList.insert("draw:border", (double)(m_currentFillStyle.gradient.m_edgeOffset)/100.0, librevenge::RVNG_PERCENT);
             break;
           case 2: // radial
-            propList.insert("draw:border", (2.0 * (double)(m_currentFillStyle.gradient.m_edgeOffset)/100.0), WPX_PERCENT);
+            propList.insert("draw:border", (2.0 * (double)(m_currentFillStyle.gradient.m_edgeOffset)/100.0), librevenge::RVNG_PERCENT);
             propList.insert("draw:style", "radial");
-            propList.insert("svg:cx", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), WPX_PERCENT);
-            propList.insert("svg:cy", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), WPX_PERCENT);
+            propList.insert("svg:cx", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), librevenge::RVNG_PERCENT);
+            propList.insert("svg:cy", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), librevenge::RVNG_PERCENT);
             break;
           case 4: // square
-            propList.insert("draw:border", (2.0 * (double)(m_currentFillStyle.gradient.m_edgeOffset)/100.0), WPX_PERCENT);
+            propList.insert("draw:border", (2.0 * (double)(m_currentFillStyle.gradient.m_edgeOffset)/100.0), librevenge::RVNG_PERCENT);
             propList.insert("draw:style", "square");
-            propList.insert("svg:cx", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), WPX_PERCENT);
-            propList.insert("svg:cy", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), WPX_PERCENT);
+            propList.insert("svg:cx", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), librevenge::RVNG_PERCENT);
+            propList.insert("svg:cy", (double)(0.5 + m_currentFillStyle.gradient.m_centerXOffset/200.0), librevenge::RVNG_PERCENT);
             break;
           default:
             propList.insert("draw:style", "linear");
@@ -703,15 +682,17 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
             while (angle > 360.0)
               angle -= 360.0;
             propList.insert("draw:angle", (int)angle);
+            librevenge::RVNGPropertyListVector vec;
             for (unsigned i = 0; i < m_currentFillStyle.gradient.m_stops.size(); i++)
             {
               libcdr::CDRGradientStop &gradStop = m_currentFillStyle.gradient.m_stops[i];
-              WPXPropertyList stopElement;
-              stopElement.insert("svg:offset", gradStop.m_offset, WPX_PERCENT);
+              librevenge::RVNGPropertyList stopElement;
+              stopElement.insert("svg:offset", gradStop.m_offset, librevenge::RVNG_PERCENT);
               stopElement.insert("svg:stop-color", m_ps.getRGBColorString(gradStop.m_color));
-              stopElement.insert("svg:stop-opacity", m_fillOpacity, WPX_PERCENT);
+              stopElement.insert("svg:stop-opacity", m_fillOpacity, librevenge::RVNG_PERCENT);
               vec.append(stopElement);
             }
+            propList.insert("svg:linearGradient", vec);
             break;
           }
         }
@@ -726,15 +707,17 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
           while (angle > 360.0)
             angle -= 360.0;
           propList.insert("draw:angle", (int)angle);
+          librevenge::RVNGPropertyListVector vec;
           for (unsigned i = 0; i < m_currentFillStyle.gradient.m_stops.size(); i++)
           {
             libcdr::CDRGradientStop &gradStop = m_currentFillStyle.gradient.m_stops[i];
-            WPXPropertyList stopElement;
-            stopElement.insert("svg:offset", gradStop.m_offset, WPX_PERCENT);
+            librevenge::RVNGPropertyList stopElement;
+            stopElement.insert("svg:offset", gradStop.m_offset, librevenge::RVNG_PERCENT);
             stopElement.insert("svg:stop-color", m_ps.getRGBColorString(gradStop.m_color));
-            stopElement.insert("svg:stop-opacity", m_fillOpacity, WPX_PERCENT);
+            stopElement.insert("svg:stop-opacity", m_fillOpacity, librevenge::RVNG_PERCENT);
             vec.append(stopElement);
           }
+          propList.insert("svg:linearGradient", vec);
         }
         break;
       case 7: // Pattern
@@ -743,10 +726,10 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
         if (iterPattern != m_ps.m_patterns.end())
         {
           propList.insert("draw:fill", "bitmap");
-          WPXBinaryData image;
+          librevenge::RVNGBinaryData image;
           _generateBitmapFromPattern(image, iterPattern->second, m_currentFillStyle.color1, m_currentFillStyle.color2);
 #if DUMP_PATTERN
-          WPXString filename;
+          librevenge::RVNGString filename;
           filename.sprintf("pattern%.8x.bmp", m_currentFillStyle.imageFill.id);
           FILE *f = fopen(filename.cstr(), "wb");
           if (f)
@@ -758,12 +741,12 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
           }
 #endif
           propList.insert("draw:fill-image", image.getBase64Data());
-          propList.insert("libwpg:mime-type", "image/bmp");
+          propList.insert("librevenge:mime-type", "image/bmp");
           propList.insert("style:repeat", "repeat");
           if (m_currentFillStyle.imageFill.isRelative)
           {
-            propList.insert("svg:width", m_currentFillStyle.imageFill.width, WPX_PERCENT);
-            propList.insert("svg:height", m_currentFillStyle.imageFill.height, WPX_PERCENT);
+            propList.insert("svg:width", m_currentFillStyle.imageFill.width, librevenge::RVNG_PERCENT);
+            propList.insert("svg:height", m_currentFillStyle.imageFill.height, librevenge::RVNG_PERCENT);
           }
           else
           {
@@ -781,9 +764,9 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
           if (m_currentFillStyle.imageFill.isRelative)
           {
             if (m_currentFillStyle.imageFill.xOffset != 0.0 && m_currentFillStyle.imageFill.xOffset != 1.0)
-              propList.insert("draw:fill-image-ref-point-x", m_currentFillStyle.imageFill.xOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-x", m_currentFillStyle.imageFill.xOffset, librevenge::RVNG_PERCENT);
             if (m_currentFillStyle.imageFill.yOffset != 0.0 && m_currentFillStyle.imageFill.yOffset != 1.0)
-              propList.insert("draw:fill-image-ref-point-y", m_currentFillStyle.imageFill.yOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-y", m_currentFillStyle.imageFill.yOffset, librevenge::RVNG_PERCENT);
           }
           else
           {
@@ -794,7 +777,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
                 xOffset += 1.0;
               while (xOffset > 1.0)
                 xOffset -= 1.0;
-              propList.insert("draw:fill-image-ref-point-x", xOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-x", xOffset, librevenge::RVNG_PERCENT);
             }
             if (m_fillTransforms.getTranslateY() != 0.0)
             {
@@ -803,7 +786,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
                 yOffset += 1.0;
               while (yOffset > 1.0)
                 yOffset -= 1.0;
-              propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, librevenge::RVNG_PERCENT);
             }
           }
         }
@@ -819,17 +802,17 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
       case 9: // Bitmap
       case 11: // Texture
       {
-        std::map<unsigned, WPXBinaryData>::iterator iterBmp = m_ps.m_bmps.find(m_currentFillStyle.imageFill.id);
+        std::map<unsigned, librevenge::RVNGBinaryData>::iterator iterBmp = m_ps.m_bmps.find(m_currentFillStyle.imageFill.id);
         if (iterBmp != m_ps.m_bmps.end())
         {
-          propList.insert("libwpg:mime-type", "image/bmp");
+          propList.insert("librevenge:mime-type", "image/bmp");
           propList.insert("draw:fill", "bitmap");
           propList.insert("draw:fill-image", iterBmp->second.getBase64Data());
           propList.insert("style:repeat", "repeat");
           if (m_currentFillStyle.imageFill.isRelative)
           {
-            propList.insert("svg:width", m_currentFillStyle.imageFill.width, WPX_PERCENT);
-            propList.insert("svg:height", m_currentFillStyle.imageFill.height, WPX_PERCENT);
+            propList.insert("svg:width", m_currentFillStyle.imageFill.width, librevenge::RVNG_PERCENT);
+            propList.insert("svg:height", m_currentFillStyle.imageFill.height, librevenge::RVNG_PERCENT);
           }
           else
           {
@@ -847,9 +830,9 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
           if (m_currentFillStyle.imageFill.isRelative)
           {
             if (m_currentFillStyle.imageFill.xOffset != 0.0 && m_currentFillStyle.imageFill.xOffset != 1.0)
-              propList.insert("draw:fill-image-ref-point-x", m_currentFillStyle.imageFill.xOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-x", m_currentFillStyle.imageFill.xOffset, librevenge::RVNG_PERCENT);
             if (m_currentFillStyle.imageFill.yOffset != 0.0 && m_currentFillStyle.imageFill.yOffset != 1.0)
-              propList.insert("draw:fill-image-ref-point-y", m_currentFillStyle.imageFill.yOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-y", m_currentFillStyle.imageFill.yOffset, librevenge::RVNG_PERCENT);
           }
           else
           {
@@ -860,7 +843,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
                 xOffset += 1.0;
               while (xOffset > 1.0)
                 xOffset -= 1.0;
-              propList.insert("draw:fill-image-ref-point-x", xOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-x", xOffset, librevenge::RVNG_PERCENT);
             }
             if (m_fillTransforms.getTranslateY() != 0.0)
             {
@@ -869,7 +852,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
                 yOffset += 1.0;
               while (yOffset > 1.0)
                 yOffset -= 1.0;
-              propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, librevenge::RVNG_PERCENT);
             }
           }
         }
@@ -879,17 +862,17 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
       break;
       case 10: // Full color
       {
-        std::map<unsigned, WPXBinaryData>::iterator iterVect = m_ps.m_vects.find(m_currentFillStyle.imageFill.id);
+        std::map<unsigned, librevenge::RVNGBinaryData>::iterator iterVect = m_ps.m_vects.find(m_currentFillStyle.imageFill.id);
         if (iterVect != m_ps.m_vects.end())
         {
           propList.insert("draw:fill", "bitmap");
-          propList.insert("libwpg:mime-type", "image/svg+xml");
+          propList.insert("librevenge:mime-type", "image/svg+xml");
           propList.insert("draw:fill-image", iterVect->second.getBase64Data());
           propList.insert("style:repeat", "repeat");
           if (m_currentFillStyle.imageFill.isRelative)
           {
-            propList.insert("svg:width", m_currentFillStyle.imageFill.width, WPX_PERCENT);
-            propList.insert("svg:height", m_currentFillStyle.imageFill.height, WPX_PERCENT);
+            propList.insert("svg:width", m_currentFillStyle.imageFill.width, librevenge::RVNG_PERCENT);
+            propList.insert("svg:height", m_currentFillStyle.imageFill.height, librevenge::RVNG_PERCENT);
           }
           else
           {
@@ -907,9 +890,9 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
           if (m_currentFillStyle.imageFill.isRelative)
           {
             if (m_currentFillStyle.imageFill.xOffset != 0.0 && m_currentFillStyle.imageFill.xOffset != 1.0)
-              propList.insert("draw:fill-image-ref-point-x", m_currentFillStyle.imageFill.xOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-x", m_currentFillStyle.imageFill.xOffset, librevenge::RVNG_PERCENT);
             if (m_currentFillStyle.imageFill.yOffset != 0.0 && m_currentFillStyle.imageFill.yOffset != 1.0)
-              propList.insert("draw:fill-image-ref-point-y", m_currentFillStyle.imageFill.yOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-y", m_currentFillStyle.imageFill.yOffset, librevenge::RVNG_PERCENT);
           }
           else
           {
@@ -920,7 +903,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
                 xOffset += 1.0;
               while (xOffset > 1.0)
                 xOffset -= 1.0;
-              propList.insert("draw:fill-image-ref-point-x", xOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-x", xOffset, librevenge::RVNG_PERCENT);
             }
             if (m_fillTransforms.getTranslateY() != 0.0)
             {
@@ -929,7 +912,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
                 yOffset += 1.0;
               while (yOffset > 1.0)
                 yOffset -= 1.0;
-              propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, WPX_PERCENT);
+              propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, librevenge::RVNG_PERCENT);
             }
           }
         }
@@ -945,7 +928,7 @@ void libcdr::CDRContentCollector::_fillProperties(WPXPropertyList &propList, WPX
   }
 }
 
-void libcdr::CDRContentCollector::_lineProperties(WPXPropertyList &propList)
+void libcdr::CDRContentCollector::_lineProperties(librevenge::RVNGPropertyList &propList)
 {
   if (m_currentLineStyle.lineType == (unsigned short)-1)
   {
@@ -1044,10 +1027,10 @@ void libcdr::CDRContentCollector::_lineProperties(WPXPropertyList &propList)
           dots2len = dots1len;
         }
         propList.insert("draw:dots1", dots1);
-        propList.insert("draw:dots1-length", 72.0*(m_currentLineStyle.lineWidth * scale)*dots1len, WPX_POINT);
+        propList.insert("draw:dots1-length", 72.0*(m_currentLineStyle.lineWidth * scale)*dots1len, librevenge::RVNG_POINT);
         propList.insert("draw:dots2", dots2);
-        propList.insert("draw:dots2-length", 72.0*(m_currentLineStyle.lineWidth * scale)*dots2len, WPX_POINT);
-        propList.insert("draw:distance", 72.0*(m_currentLineStyle.lineWidth * scale)*gap, WPX_POINT);
+        propList.insert("draw:dots2-length", 72.0*(m_currentLineStyle.lineWidth * scale)*dots2len, librevenge::RVNG_POINT);
+        propList.insert("draw:distance", 72.0*(m_currentLineStyle.lineWidth * scale)*gap, librevenge::RVNG_POINT);
       }
     }
     else
@@ -1056,11 +1039,45 @@ void libcdr::CDRContentCollector::_lineProperties(WPXPropertyList &propList)
       propList.insert("svg:stroke-width", 0.0);
       propList.insert("svg:stroke-color", "#000000");
     }
-
   }
+
+  // Deal with line markers (arrows, etc.)
+  if (!m_currentLineStyle.startMarker.empty())
+  {
+    CDRPath startMarker(m_currentLineStyle.startMarker);
+    startMarker.transform(m_currentTransforms);
+    if (!m_groupTransforms.empty())
+      startMarker.transform(m_groupTransforms.top());
+    CDRTransform tmpTrafo = CDRTransform(1.0, 0.0, 0.0, 0.0, -1.0, 0);
+    startMarker.transform(tmpTrafo);
+    librevenge::RVNGString path, viewBox;
+    double width;
+    startMarker.writeOut(path, viewBox, width);
+    propList.insert("draw:marker-start-viewbox", viewBox);
+    propList.insert("draw:marker-start-path", path);
+    // propList.insert("draw:marker-start-width", width);
+  }
+  if (!m_currentLineStyle.endMarker.empty())
+  {
+    CDRPath endMarker(m_currentLineStyle.endMarker);
+    endMarker.transform(m_currentTransforms);
+    if (!m_groupTransforms.empty())
+      endMarker.transform(m_groupTransforms.top());
+    CDRTransform tmpTrafo = CDRTransform(-1.0, 0.0, 0.0, 0.0, -1.0, 0);
+    endMarker.transform(tmpTrafo);
+    librevenge::RVNGString path, viewBox;
+    double width;
+    endMarker.writeOut(path, viewBox, width);
+    propList.insert("draw:marker-end-viewbox", viewBox);
+    propList.insert("draw:marker-end-path", path);
+    // propList.insert("draw:marker-end-width", width);
+  }
+
+
+
 }
 
-void libcdr::CDRContentCollector::_generateBitmapFromPattern(WPXBinaryData &bitmap, const CDRPattern &pattern, const CDRColor &fgColor, const CDRColor &bgColor)
+void libcdr::CDRContentCollector::_generateBitmapFromPattern(librevenge::RVNGBinaryData &bitmap, const CDRPattern &pattern, const CDRColor &fgColor, const CDRColor &bgColor)
 {
   unsigned height = pattern.height;
   unsigned width = pattern.width;
@@ -1130,7 +1147,7 @@ void libcdr::CDRContentCollector::_generateBitmapFromPattern(WPXBinaryData &bitm
 
 void libcdr::CDRContentCollector::collectBitmap(unsigned imageId, double x1, double x2, double y1, double y2)
 {
-  std::map<unsigned, WPXBinaryData>::iterator iter = m_ps.m_bmps.find(imageId);
+  std::map<unsigned, librevenge::RVNGBinaryData>::iterator iter = m_ps.m_bmps.find(imageId);
   if (iter != m_ps.m_bmps.end())
     m_currentImage = CDRImage(iter->second, x1, x2, y1, y2);
 }
@@ -1166,26 +1183,30 @@ void libcdr::CDRContentCollector::collectSpnd(unsigned spnd)
     m_spnd = spnd;
 }
 
-void libcdr::CDRContentCollector::collectVectorPattern(unsigned id, const WPXBinaryData &data)
+void libcdr::CDRContentCollector::collectVectorPattern(unsigned id, const librevenge::RVNGBinaryData &data)
 {
-  WPXInputStream *input = const_cast<WPXInputStream *>(data.getDataStream());
-  input->seek(0, WPX_SEEK_SET);
+  librevenge::RVNGInputStream *input = data.getDataStream();
+  if (!input)
+    return;
+
+  input->seek(0, librevenge::RVNG_SEEK_SET);
   if (!libcdr::CMXDocument::isSupported(input))
     return;
-  CDRStringVector svgOutput;
-  input->seek(0, WPX_SEEK_SET);
-  if (!libcdr::CMXDocument::generateSVG(input, svgOutput))
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  librevenge::RVNGStringVector svgOutput;
+  librevenge::RVNGSVGDrawingGenerator generator(svgOutput, "");
+  if (!libcdr::CMXDocument::parse(input, &generator))
     return;
   if (!svgOutput.empty())
   {
     const char *header =
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-    WPXBinaryData output((const unsigned char *)header, strlen(header));
+    librevenge::RVNGBinaryData output((const unsigned char *)header, strlen(header));
     output.append((unsigned char *)svgOutput[0].cstr(), strlen(svgOutput[0].cstr()));
     m_ps.m_vects[id] = output;
   }
 #if DUMP_VECT
-  WPXString filename;
+  librevenge::RVNGString filename;
   filename.sprintf("vect%.8x.svg", id);
   FILE *f = fopen(filename.cstr(), "wb");
   if (f)

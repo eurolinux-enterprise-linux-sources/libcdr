@@ -1,31 +1,30 @@
-%global apiversion 0.0
+%global apiversion 0.1
 
 Name: libcdr
-Version: 0.0.14
-Release: 3%{?dist}
-Summary: A library providing ability to interpret and import Corel Draw drawings
+Version: 0.1.1
+Release: 1%{?dist}
+Summary: A library for import of CorelDRAW drawings
 
-Group: System Environment/Libraries
-License: GPLv2+ or LGPLv2+ or MPLv1.1
-URL: http://www.freedesktop.org/wiki/Software/libcdr
-Source: http://dev-www.libreoffice.org/src/%{name}-%{version}.tar.xz
+# the only Public Domain source is src/lib/CDRColorProfiles.h
+License: MPLv2.0 and Public Domain
+URL: http://wiki.documentfoundation.org/DLP/Libraries/libcdr
+Source: http://dev-www.libreoffice.org/src/%{name}/%{name}-%{version}.tar.xz
 
 BuildRequires: boost-devel
 BuildRequires: doxygen
-BuildRequires: lcms2-devel
-BuildRequires: libicu-devel
-BuildRequires: libwpd-devel
-BuildRequires: libwpg-devel
-BuildRequires: zlib-devel
+BuildRequires: help2man
+BuildRequires: pkgconfig(icu-i18n)
+BuildRequires: pkgconfig(lcms2)
+BuildRequires: pkgconfig(librevenge-0.0)
+BuildRequires: pkgconfig(zlib)
 
 %description
-Libcdr is library providing ability to interpret and import Corel Draw
+Libcdr is library providing ability to interpret and import CorelDRAW
 drawings into various applications. You can find it being used in
 libreoffice.
 
 %package devel
 Summary: Development files for %{name}
-Group: Development/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
@@ -34,25 +33,21 @@ developing applications that use %{name}.
 
 %package doc
 Summary: Documentation of %{name} API
-Group: Documentation
 BuildArch: noarch
 
 %description doc
 The %{name}-doc package contains documentation files for %{name}.
 
 %package tools
-Summary: Tools to transform Corel Draw drawings into other formats
-Group: Applications/Publishing
+Summary: Tools to transform CorelDRAW drawings into other formats
 Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description tools
-Tools to transform Corel Draw drawings into other formats.
+Tools to transform CorelDRAW drawings into other formats.
 Currently supported: XHTML, text, raw.
-
 
 %prep
 %setup -q
-
 
 %build
 %configure --disable-static --disable-werror
@@ -62,22 +57,29 @@ sed -i \
     libtool
 make %{?_smp_mflags} V=1
 
+export LD_LIBRARY_PATH=`pwd`/src/lib/.libs${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+help2man -N -n 'debug the conversion library' -o cdr2raw.1 ./src/conv/raw/.libs/cdr2raw
+help2man -N -n 'convert CorelDRAW document into HTML' -o cdr2xhtml.1 ./src/conv/svg/.libs/cdr2xhtml
+help2man -N -n 'convert CorelDRAW document into plain text' -o cdr2text.1 ./src/conv/text/.libs/cdr2text
+help2man -N -n 'debug the conversion library' -o cmx2raw.1 ./src/conv/raw/.libs/cmx2raw
+help2man -N -n 'convert Corel Presentation Exchange file into HTML' -o cmx2xhtml.1 ./src/conv/svg/.libs/cmx2xhtml
+help2man -N -n 'convert Corel Presentation Exchange file into plain text' -o cmx2text.1 ./src/conv/text/.libs/cmx2text
 
 %install
 make install DESTDIR=%{buildroot}
 rm -f %{buildroot}/%{_libdir}/*.la
+# rhbz#1001251 we install API docs directly from build
+rm -rf %{buildroot}/%{_docdir}/%{name}
 
+mkdir -p %{buildroot}/%{_mandir}/man1
+install -m 0644 cdr2*.1 cmx2*.1 %{buildroot}/%{_mandir}/man1
 
 %post -p /sbin/ldconfig
-
-
 %postun -p /sbin/ldconfig
 
-
 %files
-%doc AUTHORS ChangeLog COPYING.* README
+%doc AUTHORS ChangeLog COPYING.MPL README
 %{_libdir}/%{name}-%{apiversion}.so.*
-
 
 %files devel
 %doc ChangeLog
@@ -85,12 +87,9 @@ rm -f %{buildroot}/%{_libdir}/*.la
 %{_libdir}/%{name}-%{apiversion}.so
 %{_libdir}/pkgconfig/%{name}-%{apiversion}.pc
 
-
 %files doc
-%doc COPYING.*
-%dir %{_docdir}/%{name}
-%{_docdir}/%{name}/html
-
+%doc COPYING.MPL
+%doc docs/doxygen/html
 
 %files tools
 %{_bindir}/cdr2raw
@@ -99,9 +98,17 @@ rm -f %{buildroot}/%{_libdir}/*.la
 %{_bindir}/cmx2raw
 %{_bindir}/cmx2text
 %{_bindir}/cmx2xhtml
-
+%{_mandir}/man1/cdr2raw.1*
+%{_mandir}/man1/cdr2text.1*
+%{_mandir}/man1/cdr2xhtml.1*
+%{_mandir}/man1/cmx2raw.1*
+%{_mandir}/man1/cmx2text.1*
+%{_mandir}/man1/cmx2xhtml.1*
 
 %changelog
+* Fri Apr 17 2015 David Tardon <dtardon@redhat.com> - 0.1.1-1
+- Resolves: rhbz#1207750 rebase to 0.1.1
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.0.14-3
 - Mass rebuild 2014-01-24
 

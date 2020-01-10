@@ -1,30 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #include <string>
@@ -32,10 +12,8 @@
 #include <libcdr/libcdr.h>
 #include "CDRDocumentStructure.h"
 #include "CMXParser.h"
-#include "CDRSVGGenerator.h"
 #include "CDRContentCollector.h"
 #include "CDRStylesCollector.h"
-#include "CDRZipStream.h"
 #include "libcdr_utils.h"
 
 /**
@@ -44,14 +22,17 @@ Analyzes the content of an input stream to see if it can be parsed
 \return A value that indicates whether the content from the input
 stream is a Corel Draw Document that libcdr is able to parse
 */
-bool libcdr::CMXDocument::isSupported(WPXInputStream *input)
+CDRAPI bool libcdr::CMXDocument::isSupported(librevenge::RVNGInputStream *input)
 try
 {
-  input->seek(0, WPX_SEEK_SET);
+  if (!input)
+    return false;
+
+  input->seek(0, librevenge::RVNG_SEEK_SET);
   unsigned riff = readU32(input);
   if (riff != CDR_FOURCC_RIFF && riff != CDR_FOURCC_RIFX)
     return false;
-  input->seek(4, WPX_SEEK_CUR);
+  input->seek(4, librevenge::RVNG_SEEK_CUR);
   char signature_c = (char)readU8(input);
   if (signature_c != 'C' && signature_c != 'c')
     return false;
@@ -76,9 +57,12 @@ CDRPaintInterface class implementation when needed. This is often commonly calle
 \param painter A CDRPainterInterface implementation
 \return A value that indicates whether the parsing was successful
 */
-bool libcdr::CMXDocument::parse(::WPXInputStream *input, libwpg::WPGPaintInterface *painter)
+CDRAPI bool libcdr::CMXDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGDrawingInterface *painter)
 {
-  input->seek(0, WPX_SEEK_SET);
+  if (!input || !painter)
+    return false;
+
+  input->seek(0, librevenge::RVNG_SEEK_SET);
   CDRParserState ps;
   CDRStylesCollector stylesCollector(ps);
   CMXParser stylesParser(&stylesCollector);
@@ -87,26 +71,12 @@ bool libcdr::CMXDocument::parse(::WPXInputStream *input, libwpg::WPGPaintInterfa
     retVal = false;
   if (retVal)
   {
-    input->seek(0, WPX_SEEK_SET);
+    input->seek(0, librevenge::RVNG_SEEK_SET);
     CDRContentCollector contentCollector(ps, painter);
     CMXParser contentParser(&contentCollector);
     retVal = contentParser.parseRecords(input);
   }
   return retVal;
-}
-
-/**
-Parses the input stream content and generates a valid Scalable Vector Graphics
-Provided as a convenience function for applications that support SVG internally.
-\param input The input stream
-\param output The output string whose content is the resulting SVG
-\return A value that indicates whether the SVG generation was successful.
-*/
-bool libcdr::CMXDocument::generateSVG(::WPXInputStream *input, libcdr::CDRStringVector &output)
-{
-  libcdr::CDRSVGGenerator generator(output);
-  bool result = libcdr::CMXDocument::parse(input, &generator);
-  return result;
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

@@ -1,30 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #ifndef __CDRCONTENTCOLLECTOR_H__
@@ -33,7 +13,7 @@
 #include <map>
 #include <vector>
 #include <stack>
-#include <libwpg/libwpg.h>
+#include <librevenge/librevenge.h>
 #include <lcms2.h>
 #include "CDRTypes.h"
 #include "CDRPath.h"
@@ -46,7 +26,7 @@ namespace libcdr
 class CDRContentCollector : public CDRCollector
 {
 public:
-  CDRContentCollector(CDRParserState &ps, ::libwpg::WPGPaintInterface *painter);
+  CDRContentCollector(CDRParserState &ps, ::librevenge::RVNGDrawingInterface *painter);
   virtual ~CDRContentCollector();
 
   // collector functions
@@ -55,18 +35,13 @@ public:
   void collectGroup(unsigned level);
   void collectVect(unsigned level);
   void collectOtherList();
-  void collectCubicBezier(double x1, double y1, double x2, double y2, double x, double y);
-  void collectQuadraticBezier(double x1, double y1, double x, double y);
-  void collectMoveTo(double x, double y);
-  void collectLineTo(double x, double y);
-  void collectArcTo(double rx, double ry, bool largeArc, bool sweep, double x, double y);
-  void collectClosePath();
+  void collectPath(const CDRPath &path);
   void collectLevel(unsigned level);
   void collectTransform(const CDRTransforms &transforms, bool considerGroupTransform);
   void collectFillStyle(unsigned short fillType, const CDRColor &color1, const CDRColor &color2, const CDRGradient &gradient, const CDRImageFill &imageFill);
   void collectLineStyle(unsigned short lineType, unsigned short capsType, unsigned short joinType, double lineWidth,
                         double stretch, double angle, const CDRColor &color, const std::vector<unsigned> &dashArray,
-                        unsigned startMarkerId, unsigned endMarkerId);
+                        const CDRPath &startMarker, const CDRPath &endMarker);
   void collectRotate(double angle, double cx, double cy);
   void collectFlags(unsigned flags, bool considerFlags);
   void collectPageSize(double, double, double, double) {}
@@ -83,7 +58,7 @@ public:
   void collectColorProfile(const std::vector<unsigned char> &) {}
   void collectBBox(double x0, double y0, double x1, double y1);
   void collectSpnd(unsigned spnd);
-  void collectVectorPattern(unsigned id, const WPXBinaryData &data);
+  void collectVectorPattern(unsigned id, const librevenge::RVNGBinaryData &data);
   void collectPaletteEntry(unsigned, unsigned, const CDRColor &) {}
   void collectText(unsigned, unsigned, const std::vector<unsigned char> &,
                    const std::vector<unsigned char> &, const std::map<unsigned, CDRCharacterStyle> &) {}
@@ -96,16 +71,19 @@ private:
   CDRContentCollector &operator=(const CDRContentCollector &);
 
   // helper functions
+  void _startDocument();
+  void _endDocument();
   void _startPage(double width, double height);
   void _endPage();
   void _flushCurrentPath();
 
-  void _fillProperties(WPXPropertyList &propList, WPXPropertyListVector &vec);
-  void _lineProperties(WPXPropertyList &propList);
-  void _generateBitmapFromPattern(WPXBinaryData &bitmap, const CDRPattern &pattern, const CDRColor &fgColor, const CDRColor &bgColor);
+  void _fillProperties(librevenge::RVNGPropertyList &propList);
+  void _lineProperties(librevenge::RVNGPropertyList &propList);
+  void _generateBitmapFromPattern(librevenge::RVNGBinaryData &bitmap, const CDRPattern &pattern, const CDRColor &fgColor, const CDRColor &bgColor);
 
-  libwpg::WPGPaintInterface *m_painter;
+  librevenge::RVNGDrawingInterface *m_painter;
 
+  bool m_isDocumentStarted;
   bool m_isPageProperties;
   bool m_isPageStarted;
   bool m_ignorePage;

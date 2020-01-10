@@ -1,31 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- * Copyright (C) 2011 Eilidh McAdam <tibbylickle@gmail.com>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #include "CDRTransforms.h"
@@ -170,64 +149,6 @@ void libcdr::CDRTransform::applyToArc(double &rx, double &ry, double &rotation, 
     ry = 0;
     rotation = atan2(y, x);
   }
-}
-
-double libcdr::CDRTransform::_getScaleX() const
-{
-  double x0 = 0.0;
-  double x1 = 1.0;
-  double y0 = 0.0;
-  double y1 = 0.0;
-  applyToPoint(x0, y0);
-  applyToPoint(x1, y1);
-  return x1 - x0;
-}
-
-double libcdr::CDRTransform::getScaleX() const
-{
-  return fabs(_getScaleX());
-}
-
-bool libcdr::CDRTransform::getFlipX() const
-{
-  return (0 > _getScaleX());
-}
-
-double libcdr::CDRTransform::_getScaleY() const
-{
-  double x0 = 0.0;
-  double x1 = 0.0;
-  double y0 = 0.0;
-  double y1 = 1.0;
-  applyToPoint(x0, y0);
-  applyToPoint(x1, y1);
-  return y1 - y0;
-}
-
-double libcdr::CDRTransform::getScaleY() const
-{
-  return fabs(_getScaleY());
-}
-
-bool libcdr::CDRTransform::getFlipY() const
-{
-  return (0 > _getScaleY());
-}
-
-double libcdr::CDRTransform::getTranslateX() const
-{
-  double x = 0.0;
-  double y = 0.0;
-  applyToPoint(x, y);
-  return x;
-}
-
-double libcdr::CDRTransform::getTranslateY() const
-{
-  double x = 0.0;
-  double y = 0.0;
-  applyToPoint(x, y);
-  return y;
 }
 
 

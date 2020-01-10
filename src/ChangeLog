@@ -1,3 +1,505 @@
+2014-11-24  David Tardon  <dtardon@redhat.com>  [06f9844bd62f718bed85ca74d3769f73b5b9b2ab]
+
+	prepare for a release
+
+	Change-Id: I4d02133381c7cad26f2fabb25eb1abb6d1b10992
+
+2014-11-24  David Tardon  <dtardon@redhat.com>  [d8f9b82f345e3f22b440e17e58adfc23a40ee6a0]
+
+	only export public symbols
+
+	Change-Id: I0688bcb1742b0459db599517ebe50e45495a1bad
+
+2014-11-21  David Tardon  <dtardon@redhat.com>  [6d7de600e938543448f680cc840211f52bb0b848]
+
+	avoid extra big allocation, continued
+
+	Change-Id: I6cf7c2535e1a4b8163413c1826535b856587bc00
+
+2014-11-21  David Tardon  <dtardon@redhat.com>  [bc3c34481e731d2e696498d19ad5d15b5658afb8]
+
+	avoid extra big allocation, continued
+
+	Change-Id: I0e277d9cb47d9e6bf007b7a4668be339f2884b25
+
+2014-11-20  David Tardon  <dtardon@redhat.com>  [2a5b92b43336c3e0b82ffad6b06b8623d7007761]
+
+	optimize repeated seeks
+
+	This speeds up parsing of a pathological case of a broken file from
+	0m29.644s to 0m0.028s.
+
+	Change-Id: I438d8d3bfd84d3d52e8de18b2680a43948cda3ed
+
+2014-11-20  David Tardon  <dtardon@redhat.com>  [d08b5c8a09190852e21f8a2ae4b1720f13dbfbc4]
+
+	avoid extra big allocation
+
+	Change-Id: Ibb22de59d17a85e8b0a8df8be277643fc9ba7f52
+
+2014-11-20  David Tardon  <dtardon@redhat.com>  [983bc0a2e969b011760956d739260a181001a855]
+
+	deinit z_stream properly if reading from input fails
+
+	Change-Id: I5a2ce38daf8f251029ccf8c1458025f950fe2af2
+
+2014-11-20  David Tardon  <dtardon@redhat.com>  [1d605d21e7b5f87c1ad18ff2e7dc03a092a6e557]
+
+	avoid out-of-bounds read
+
+	Change-Id: I6b43ce6e7160789bdd99aabf8632bfc3431d4b7d
+
+2014-11-20  David Tardon  <dtardon@redhat.com>  [629dadcd8002d077fdd4f30d4e7f156b03e644f8]
+
+	nothing to do here if there's no bitmap data to read
+
+	Change-Id: I07d1540d44dc97d7fbb88db363123cb28b7d812d
+
+2014-11-20  David Tardon  <dtardon@redhat.com>  [4a1be786ced3083a9a609e4aa2af9bc5b89ec21e]
+
+	avoid out-of-bounds read
+
+	Change-Id: I5510b80b9c6d1512f2e6e8bb25f48fb0bcded515
+
+2014-07-29  David Tardon  <dtardon@redhat.com>  [88b4e8b39c3c187e2262786d469b0a9d9e2eae9d]
+
+	check arguments
+
+	Change-Id: I62f5abfe8f954f9825befcad589ded09ae8f7700
+
+2014-07-03  David Tardon  <dtardon@redhat.com>  [9a46ea9577d72f5e9f2eef6c74401bc7c33e3f79]
+
+	clang: value stored to input is never read
+
+	Change-Id: I50aeae903940a5ce3acfd9b5e3276fddf8aef584
+
+2014-06-03  David Tardon  <dtardon@redhat.com>  [6448d30053f59f1b71cd841629d053f6bf071d82]
+
+	coverity#1219654 avoid possible out-of-bounds access
+
+	Change-Id: I44de7037a9e3a65b539f452aace782683121ba83
+
+2014-06-03  David Tardon  <dtardon@redhat.com>  [b29f874bb1e8c15b2c77e094d4431a59662e0283]
+
+	coverity#1219811 dereference null return value
+
+	Change-Id: I2cff394e32ce6bc7bf39fae09d91a9730ad8f656
+
+2014-06-03  David Tardon  <dtardon@redhat.com>  [f8c8a0d09c0614d7b0794b09b5d3fcaba84294b1]
+
+	the const_cast is no longer necessary
+
+	Change-Id: I802fd594660761e5ee112fa096f6f4c8fcc97cbb
+
+2014-05-27  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [e973b9db65df3c367e09e0d4623be59a91074515]
+
+	The library strictly speaking does not need the stream implementations
+
+	Change-Id: I2787a6fa4b1d934c0ecd96d4e4ebb71cfc742511
+
+2014-05-23  David Tardon  <dtardon@redhat.com>  [56003faa885246a43d2117856f54bb89326b1668]
+
+	prepare for a new release
+
+	Change-Id: I69e95091590452d154dafadfc6f8a22ce7770eba
+
+2014-04-16  David Tardon  <dtardon@redhat.com>  [94eedda925e3b8a2274b4068bb50455a9fc1869a]
+
+	add other used projects to .pc file
+
+	Change-Id: Ib457b04595cfc6cc8916fc92b8cf4622afdfefe1
+
+2014-04-16  David Tardon  <dtardon@redhat.com>  [98a4e74de6a8cee5818a2929cd21a9002bab2948]
+
+	require librevenge-stream too
+
+	Change-Id: Iee5eb88e5fec5c9c1bb848bac237efde9a46fe4a
+
+2014-04-10  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [8c30fab02698e5344cf4e6b04d70114ae2207ad4]
+
+	A license in spec file
+
+	(cherry picked from commit 880a1c4b3831ccd6c7233ed75939612dbca9c646)
+
+	Conflicts:
+		libcdr.spec.in
+
+	Change-Id: I6533912dc5d7b40d7373e6235f7ec12038f3be51
+
+2014-04-10  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [fc01f33aff7981704fd2381ef2ad01a93e465040]
+
+	Add 'compile' to .gitignore
+
+	Change-Id: Ibd3a2228f104650f63383a1df2ea5eeeaaac4d89
+	(cherry picked from commit 9d5e526216497693fb4a9b94bf31c35585c3c5ed)
+
+2014-04-10  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [1c8d66f69f3df0a51b3720bde8ece1a4752c48fb]
+
+	Sanitize the README file
+
+	Correspond to the new simplified license
+	Remove the mentions of supported CDR versions in order to be more future-proof
+
+	Change-Id: I2d782a61ce938d521fb617744697e81a93dbec40
+	(cherry picked from commit ec11a06d7fc5ae6c3f53149b93902fea771d806c)
+
+2014-04-04  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [534d406ff9f6b124fddb3e18b44176aaba54f032]
+
+	YIQ255 - second service - deuce
+
+	Change-Id: I7cc39c45a3d4a826a20d4e57dc703bec7bd0818e
+
+2014-04-04  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [168d996f23d74ea2a47b4d06e841e3fc9a87f97a]
+
+	First try of YIQ
+
+	Change-Id: I14e981584a5d62cc9e1eff8da5821530c99ff43c
+
+2014-04-04  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [b1d482cb6fa2182e15d73b0bb0d339c4000fc695]
+
+	Try hard to avoid a sequence of several "Z" segments
+
+	Change-Id: I14a1f987ed59131fe3f262f81354da0f2d2fe21d
+
+2014-04-04  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [f06333217ad55e841c4bd5b20b4eebbf7a9ce2f6]
+
+	Working around a CorelDraw x7 bug + fixing palettes
+
+	Change-Id: I56ce7bfd3a49923cbf6e989687f02cdcf287eecb
+
+2014-04-03  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [ab2f1654645b90409be88686d1189bde01ad173b]
+
+	Fix closing of paths with certain particular CDR documents
+
+	Change-Id: I9d60baedd56e60ec46b5f5ed11790f38670df948
+
+2014-04-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [e5d64cd09294285a2a3f016a8e24abd98759781a]
+
+	Palette 19-03
+
+	Change-Id: Id679b4f5c6f02a3982245811b06a77f4bb526421
+
+2014-04-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [7e91dba8fbcb237f281ad0a113cf51326154b4d5]
+
+	CorelDraw X7 txsm
+
+	Change-Id: I2f0507fe2a72f3c1adb3ff60c557ca14c977ec6a
+
+2014-01-31  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [6741805f2e98fab62899ebb6776b93d473a2ec94]
+
+	With agreement of all contributors, simplifying licensing to MPL2
+
+	Change-Id: I7dec727b183d9543cdad67cd9202195cd7370877
+
+2013-12-21  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [1136084ac3b014acb1455dae8ed7dd0d7dc284f0]
+
+	Implement the RVNGInputStream::existsSubStream
+
+	Change-Id: I6ab1179522f8c109ccb5178ca9087d25bbf15187
+
+2013-12-18  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [3e06fd204357adc066efd1375540f0eb1908bb1c]
+
+	Export only needed stuff on Windows
+
+	Change-Id: I004e93c6159bfd7479ea14f2e40fefe9b20953b6
+
+2013-12-11  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [6d30f036332c31b3bcc1a4e54d831ca63b6caa5d]
+
+	Re-astyle
+
+	Change-Id: Ic84f176d190362364a3f6d13a811df3447fa32e6
+
+2013-12-11  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [98177d97e4c4f5f281cdc7bd2005de046333cddd]
+
+	Allow equal identing of functions
+
+
+2013-12-03  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [5ca4ddf38f1248908697e0b6bc301a940929f925]
+
+	Insert only single empty text
+
+	Change-Id: Ifa5823e5f6ba588b84858e8b0b987bb54349af46
+
+2013-12-03  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [1ac63edbf85f72590b4601aa16e8fd75702c2530]
+
+	Split spaces, tabs and lineBreaks from the text
+
+	Change-Id: I6d7284b9a2b629f6ea609ebd726a4d421e571603
+
+2013-12-03  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [00dea16c89b68668ea1ced9601fe33b728db4234]
+
+	Emit start/endDocument calls
+
+	Change-Id: Ic8413c9f24a0fa06ed6bbb24d1be8dd638b176aa
+
+2013-11-30  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [098016594ada45f56fb9777db723f98ec963fb14]
+
+	Allow cdr/cmx2raw output callgraph
+
+	Change-Id: I62441d16abbcd7f51a223568f93ad9252398c2f1
+
+2013-11-28  David Tardon  <dtardon@redhat.com>  [70a49adcac0c7fa201ba75cae4784f68914cf778]
+
+	add options file for astyle
+
+	Change-Id: Ifa12207d6d3bde25af615b293ca1f18c839a3a2f
+
+2013-11-28  David Tardon  <dtardon@redhat.com>  [69f9ef62dca5158f84c00c24c66afca2df50b522]
+
+	add myself to AUTHORS
+
+	Change-Id: I40930bd9771a813c5aa4a9f4811aaacc6e552e2a
+
+2013-11-28  David Tardon  <dtardon@redhat.com>  [166993d65df5724829b1b64a27ba5cb96d745574]
+
+	document the current astyle settings
+
+	Change-Id: I93696d2ac46fe15b1d94cf07342cc14db34b4c7f
+
+2013-11-25  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [5c5d18e14ca19ef90d42a71cb1dab4fa060689dd]
+
+	astyle -HU -A1 -k3 -y -n -s2 -r \*.cpp \*.h
+
+	Change-Id: Iadd40c708ad1cf74843dda3a6ee6f7d374766f68
+
+2013-11-23  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [84d90a4d213b15337a8030aa18e843554ca1c882]
+
+	Fold in the gradient
+
+	Change-Id: I431b96cc00343492e0cac255b3b9482a780d7749
+
+2013-11-21  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [3bf9405bfccc355b9061a061601c834a46b28c41]
+
+	Fold tabStops into the propList
+
+	Change-Id: Iff95c7d1b24ba6bdf6e5c98e598ce7b35451fa7f
+
+2013-11-20  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [73e56f4fc9f9346c56873c04dedcad8e17d31388]
+
+	Folding paths into propLists
+
+	Change-Id: I1abc8e69ef452f22c0f464126bc72c2a28c03fb5
+
+2013-11-19  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [be72b4f99fabd5ca109d2b64c0e3155f0f45410b]
+
+	Don't parse arrows for versions <= 5
+
+	Change-Id: I90684d9c731d6daee25e18bedbbb0ee951327671
+
+2013-11-19  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [c90e4c9587917bbe3c28597f6b7392f86a5ed71d]
+
+	Use the right streams in right places
+
+	Change-Id: I204d422d3645d4527044bb3d1750ad6ab625fc02
+
+2013-11-14  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [77f866cd44b3c024ee64fe050d7ae6f55a5a8784]
+
+	Adapt to API change in librevenge
+
+	Change-Id: I70254919ee04d9111ef12552c113b3cc0064ab01
+
+2013-11-08  David Tardon  <dtardon@redhat.com>  [e7ea841053efbbc8cb2ee25bf6339315713e08dc]
+
+	adapt to generator changes
+
+	Change-Id: I2cde7e92dc1b0407bbd5c143cdd585e21f0494d7
+
+2013-11-07  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [37a7b199f6ea34ea9c4d59a9adfdd736bac28887]
+
+	historically this svg was in svg namespace
+
+	Change-Id: Ie68b6acfbc77b9aa712b9a72caf5ae379d59a19f
+
+2013-11-07  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [58cb70b98f57a1775b5c4664bf500029ae06f628]
+
+	Some little fixes
+
+	Change-Id: Icb50d0d2971a86997a59f484bcf25cf5a67f91cb
+
+2013-11-06  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [08177147508465da5207bac24661465cf0c39a12]
+
+	callcatcher action
+
+	Change-Id: I4e84acb68b51c9087206dfda37c592229fcc77a7
+
+2013-11-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [007dd6502fc8b007251bc477399407dd93220389]
+
+	SVG generator must be a core functionality
+
+	Change-Id: I02e28aeeae34769760875020837d861d4b706fdc
+
+2013-11-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [c8d5fe5e64cb8c4075ff11402440ef85d09b958a]
+
+	Fix dependencies
+
+	Change-Id: Ib6face91cf14f0fbb36c03627e73f3f5c064d282
+
+2013-11-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [a9b2a6129dde8e3e59c8f9233c391cff5ec5aef1]
+
+	Port to librevenge
+
+	Change-Id: I62edd528358a5f2614b75b21bdd9d89e7c8dcc8d
+
+2013-11-03  Julien Nabet  <serval2412@yahoo.fr>  [a0177028897b054e8ac807f818b3d1eae5d44850]
+
+	Some cppcheck cleaning
+
+	Change-Id: I559eaa5195f2f88ae79349162e136e845d462e9f
+
+2013-10-08  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [66c1820f54c52fe3a45ef1fe9f33b669b620c324]
+
+	lcms2 and zlib are compile-time dependencies only
+
+	Change-Id: I58f4fe2527f309fa862a52403472e123d86030da
+
+2013-09-06  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [b279f9604bb1194e2eadf201dd5b6277e7494fea]
+
+	stroke-dasharray: solid is invalid, use none
+
+
+2013-09-03  David Tardon  <dtardon@redhat.com>  [5e7bbd79cc6b90c7473efda605259c9613c52c41]
+
+	use cgit/gitweb URLs after all
+
+	Change-Id: I62fb1a9e3e53c823c2e2a3db120220c04488b73b
+
+2013-09-03  David Tardon  <dtardon@redhat.com>  [e1c6373b727a3c79941d23b825538c32e49c80d9]
+
+	update README
+
+	Change-Id: I4b64948956b8819896b2ed2ee117fe747c38078f
+	Reviewed-on: https://gerrit.libreoffice.org/5772
+	Reviewed-by: David Tardon <dtardon@redhat.com>
+	Tested-by: David Tardon <dtardon@redhat.com>
+
+2013-09-03  David Tardon  <dtardon@redhat.com>  [833fd12ef16b40d18c8bd2e0259618d4d8a2503a]
+
+	simplify use of git-review for libcdr
+
+	Change-Id: I6570dcfe3992706b07ee042ea60eafd991e5d8f9
+
+2013-09-02  David Tardon  <dtardon@redhat.com>  [e405bd898fc753a103faa20f270d9418b9fd21d6]
+
+	update README
+
+
+2013-09-02  Norbert Thiebaud  <nthiebaud@gmail.com>  [833c85d2c01f94a1c415274b0d816a2ea5e7c1e6]
+
+	add automatic git hook setting in autogen.sh
+
+	Change-Id: I95eb02dc2d347337d7b85f85d6459353278fb137
+	Reviewed-on: https://gerrit.libreoffice.org/5745
+	Reviewed-by: Fridrich Strba <fridrich@documentfoundation.org>
+	Tested-by: Fridrich Strba <fridrich@documentfoundation.org>
+
+2013-08-31  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [c3115d938be364817777225d09cc2946c01df195]
+
+	Little tiny nit
+
+	Change-Id: Ib4fed604412afdaeb3ec0b03c1c8328eae554842
+	Reviewed-on: https://gerrit.libreoffice.org/5717
+	Reviewed-by: Fridrich Strba <fridrich@documentfoundation.org>
+	Tested-by: Fridrich Strba <fridrich@documentfoundation.org>
+
+2013-08-31  Dave McKellar  <dmckellar@gmail.com>  [fed51f29956c96cfe9cfcb3e132f8b2ba0e1b10b]
+
+	Changed the Corel Draw versions for udta
+
+	Change-Id: I56858984c6ce67d732294020669687053b7b8b50
+	Reviewed-on: https://gerrit.libreoffice.org/5716
+	Reviewed-by: Fridrich Strba <fridrich@documentfoundation.org>
+	Tested-by: Fridrich Strba <fridrich@documentfoundation.org>
+
+2013-08-29  Dave McKellar  <dmckellar@gmail.com>  [a727df96747c093a00bd7562353fa9d9488a9313]
+
+	Made my udta change only apply to Corel Draw X4
+
+
+2013-08-29  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [624ebbdb53cd792cb0458f9444250e59e7321c05]
+
+	astyle action
+
+
+2013-08-29  Dave McKellar  <dmckellar@gmail.com>  [cbebfbaff8b7826bc631bbf51eb9a06ee5121326]
+
+	Added initial support for the "udta" fourcc.
+
+
+2013-08-08  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [0319fb78d19f2c13ad4fb3f90e4dcaedb4976412]
+
+	Some more transformations of markers (still a mess)
+
+
+2013-07-31  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [d66580805e97af0eb21907034f23033b99f4990b]
+
+	Really reduce the scope of have :)
+
+
+2013-07-27  Julien Nabet  <serval2412@yahoo.fr>  [6f5b8e2ca95aac2fe8215557514cb2cdc923fe5f]
+
+	cppcheck: reduce scope of have
+
+
+2013-07-25  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [7a9f8be1d17e8e74d2d0e60da36152a300a4de6c]
+
+	Hard depend on libwpd 0.9.5
+
+
+2013-07-11  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [bd02faf784088b47c6aaabdc1bab2d5f7993a7da]
+
+	Some more trying to get the markers right-ish
+
+
+2013-07-11  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [3d46ffb3840898d303777fee0f8900101eead9e2]
+
+	Some fixes of parser
+
+
+2013-07-11  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [20179ba61a98c1b9896c751d847838383e968d23]
+
+	Some more code towards handling arrw
+
+
+2013-07-06  David Tardon  <dtardon@redhat.com>  [df155ad555c5e4eb9c991d7e08b5a7816e399257]
+
+	coverity: avoid memory leak on exception
+
+
+2013-07-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [8dadbeb2385227a5066beeacf1c48c5121b31a5d]
+
+	Code for visual debugging of splines
+
+
+2013-07-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [e5e26505e64487a1d292b3d59960456ee766830c]
+
+	Decompose Splines into a sequence of cubic beziers
+
+
+2013-06-29  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [a15af9bca619989202c73d9d5ea436c0ac89294f]
+
+	Get the arrow information to the collector
+
+
+2013-06-29  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [4a075558a28bcd09f554760ebcc3734afac304fc]
+
+	Simplify the path collection a bit
+
+
+2013-06-29  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [c5b8d15ce18f1ebd63a5c3774c44f5ca60a8b8fb]
+
+	Initial reading of arrw records
+
+
+2013-06-06  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [17710d0b48f17bc29882ace7c4100ce883d54503]
+
+	Adapting doxygen to the new layout
+
+
+2013-05-31  Michael Stahl  <mstahl@redhat.com>  [8cd766dd834781c07e678753af302f8fccb24846]
+
+	fix build with MSVC2008
+
+
 2013-05-17  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [87f6727d616d4819101f51b21c92f32232dc7e31]
 
 	Bump version

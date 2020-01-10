@@ -1,33 +1,13 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2011 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <libwpd-stream/libwpd-stream.h>
+#include <librevenge-stream/librevenge-stream.h>
 #include "libcdr_utils.h"
 #include "CommonParser.h"
 
@@ -42,7 +22,7 @@ libcdr::CommonParser::~CommonParser()
 {
 }
 
-double libcdr::CommonParser::readCoordinate(WPXInputStream *input, bool bigEndian)
+double libcdr::CommonParser::readCoordinate(librevenge::RVNGInputStream *input, bool bigEndian)
 {
   if (m_precision == PRECISION_UNKNOWN)
     throw UnknownPrecisionException();
@@ -51,7 +31,7 @@ double libcdr::CommonParser::readCoordinate(WPXInputStream *input, bool bigEndia
   return (double)readS32(input, bigEndian) / 254000.0;
 }
 
-unsigned libcdr::CommonParser::readUnsigned(WPXInputStream *input, bool bigEndian)
+unsigned libcdr::CommonParser::readUnsigned(librevenge::RVNGInputStream *input, bool bigEndian)
 {
   if (m_precision == PRECISION_UNKNOWN)
     throw UnknownPrecisionException();
@@ -60,7 +40,7 @@ unsigned libcdr::CommonParser::readUnsigned(WPXInputStream *input, bool bigEndia
   return readU32(input, bigEndian);
 }
 
-unsigned short libcdr::CommonParser::readUnsignedShort(WPXInputStream *input, bool bigEndian)
+unsigned short libcdr::CommonParser::readUnsignedShort(librevenge::RVNGInputStream *input, bool bigEndian)
 {
   if (m_precision == PRECISION_UNKNOWN)
     throw UnknownPrecisionException();
@@ -69,7 +49,7 @@ unsigned short libcdr::CommonParser::readUnsignedShort(WPXInputStream *input, bo
   return readU16(input, bigEndian);
 }
 
-int libcdr::CommonParser::readInteger(WPXInputStream *input, bool bigEndian)
+int libcdr::CommonParser::readInteger(librevenge::RVNGInputStream *input, bool bigEndian)
 {
   if (m_precision == PRECISION_UNKNOWN)
     throw UnknownPrecisionException();
@@ -78,7 +58,7 @@ int libcdr::CommonParser::readInteger(WPXInputStream *input, bool bigEndian)
   return readS32(input, bigEndian);
 }
 
-double libcdr::CommonParser::readAngle(WPXInputStream *input, bool bigEndian)
+double libcdr::CommonParser::readAngle(librevenge::RVNGInputStream *input, bool bigEndian)
 {
   if (m_precision == PRECISION_UNKNOWN)
     throw UnknownPrecisionException();
@@ -89,6 +69,14 @@ double libcdr::CommonParser::readAngle(WPXInputStream *input, bool bigEndian)
 
 void libcdr::CommonParser::outputPath(const std::vector<std::pair<double, double> > &points,
                                       const std::vector<unsigned char> &types)
+{
+  CDRPath path;
+  processPath(points, types, path);
+  m_collector->collectPath(path);
+}
+
+void libcdr::CommonParser::processPath(const std::vector<std::pair<double, double> > &points,
+                                       const std::vector<unsigned char> &types, CDRPath &path)
 {
   bool isClosedPath = false;
   std::vector<std::pair<double, double> >tmpPoints;
@@ -113,29 +101,31 @@ void libcdr::CommonParser::outputPath(const std::vector<std::pair<double, double
     }
     if (!(type & 0x40) && !(type & 0x80))
     {
+      if (isClosedPath)
+        path.appendClosePath();
       tmpPoints.clear();
-      m_collector->collectMoveTo(points[k].first, points[k].second);
+      path.appendMoveTo(points[k].first, points[k].second);
     }
     else if ((type & 0x40) && !(type & 0x80))
     {
       tmpPoints.clear();
-      m_collector->collectLineTo(points[k].first, points[k].second);
+      path.appendLineTo(points[k].first, points[k].second);
       if (isClosedPath)
-        m_collector->collectClosePath();
+        path.appendClosePath();
     }
     else if (!(type & 0x40) && (type & 0x80))
     {
       if (tmpPoints.size() >= 2)
-        m_collector->collectCubicBezier(tmpPoints[0].first, tmpPoints[0].second,
-                                        tmpPoints[1].first, tmpPoints[1].second,
-                                        points[k].first, points[k].second);
+        path.appendCubicBezierTo(tmpPoints[0].first, tmpPoints[0].second,
+                                 tmpPoints[1].first, tmpPoints[1].second,
+                                 points[k].first, points[k].second);
       else
-        m_collector->collectLineTo(points[k].first, points[k].second);
+        path.appendLineTo(points[k].first, points[k].second);
       if (isClosedPath)
-        m_collector->collectClosePath();
+        path.appendClosePath();
       tmpPoints.clear();
     }
-    else if((type & 0x40) && (type & 0x80))
+    else if ((type & 0x40) && (type & 0x80))
     {
       tmpPoints.push_back(points[k]);
     }

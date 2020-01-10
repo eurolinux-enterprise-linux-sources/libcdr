@@ -1,30 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #include <math.h>
@@ -54,7 +34,7 @@ libcdr::CDRStylesCollector::~CDRStylesCollector()
 void libcdr::CDRStylesCollector::collectBmp(unsigned imageId, unsigned colorModel, unsigned width, unsigned height, unsigned bpp, const std::vector<unsigned> &palette, const std::vector<unsigned char> &bitmap)
 {
   libcdr::CDRInternalStream stream(bitmap);
-  WPXBinaryData image;
+  librevenge::RVNGBinaryData image;
 
   unsigned tmpPixelSize = (unsigned)(height * width);
   if (tmpPixelSize < (unsigned)height) // overflow
@@ -133,6 +113,8 @@ void libcdr::CDRStylesCollector::collectBmp(unsigned imageId, unsigned colorMode
       while (i < lineWidth && i < width)
       {
         unsigned char c = bitmap[j*lineWidth+i];
+        if (c >= palette.size())
+          c = palette.size() - 1;
         i++;
         writeU32(image, m_ps.getBMPColor(libcdr::CDRColor(colorModel, palette[c])));
       }
@@ -164,7 +146,7 @@ void libcdr::CDRStylesCollector::collectBmp(unsigned imageId, unsigned colorMode
   if (storeBMP)
   {
 #if DUMP_IMAGE
-    WPXString filename;
+    librevenge::RVNGString filename;
     filename.sprintf("bitmap%.8x.bmp", imageId);
     FILE *f = fopen(filename.cstr(), "wb");
     if (f)
@@ -182,9 +164,9 @@ void libcdr::CDRStylesCollector::collectBmp(unsigned imageId, unsigned colorMode
 
 void libcdr::CDRStylesCollector::collectBmp(unsigned imageId, const std::vector<unsigned char> &bitmap)
 {
-  WPXBinaryData image(&bitmap[0], bitmap.size());
+  librevenge::RVNGBinaryData image(&bitmap[0], bitmap.size());
 #if DUMP_IMAGE
-  WPXString filename;
+  librevenge::RVNGString filename;
   filename.sprintf("bitmap%.8x.bmp", imageId);
   FILE *f = fopen(filename.cstr(), "wb");
   if (f)
@@ -229,7 +211,7 @@ void libcdr::CDRStylesCollector::collectPaletteEntry(unsigned colorId, unsigned 
 }
 
 void libcdr::CDRStylesCollector::collectText(unsigned textId, unsigned styleId, const std::vector<unsigned char> &data,
-    const std::vector<unsigned char> &charDescriptions, const std::map<unsigned, CDRCharacterStyle> &styleOverrides)
+                                             const std::vector<unsigned char> &charDescriptions, const std::map<unsigned, CDRCharacterStyle> &styleOverrides)
 {
   if (data.empty() || charDescriptions.empty())
     return;
@@ -250,7 +232,7 @@ void libcdr::CDRStylesCollector::collectText(unsigned textId, unsigned styleId, 
       tmpCharStyle.overrideCharacterStyle(iter->second);
     if (charDescriptions[i] != tmpCharDescription)
     {
-      WPXString text;
+      librevenge::RVNGString text;
       if (!tmpTextData.empty())
       {
         if (tmpCharDescription & 0x01)
@@ -264,12 +246,12 @@ void libcdr::CDRStylesCollector::collectText(unsigned textId, unsigned styleId, 
 
     }
     tmpTextData.push_back(data[j++]);
-    if (tmpCharDescription & 0x01)
+    if ((tmpCharDescription & 0x01) && (j < data.size()))
       tmpTextData.push_back(data[j++]);
   }
   if (!tmpTextData.empty())
   {
-    WPXString text;
+    librevenge::RVNGString text;
     if (tmpCharDescription & 0x01)
       appendCharacters(text, tmpTextData);
     else

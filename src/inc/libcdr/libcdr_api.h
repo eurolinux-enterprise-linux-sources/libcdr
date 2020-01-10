@@ -7,11 +7,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef __LIBCDR_H__
-#define __LIBCDR_H__
+#ifndef __LIBCDR_API_H__
+#define __LIBCDR_API_H__
 
-#include "CDRDocument.h"
-#include "CMXDocument.h"
+#ifdef DLL_EXPORT
+#ifdef LIBCDR_BUILD
+#define CDRAPI __declspec(dllexport)
+#else
+#define CDRAPI __declspec(dllimport)
+#endif
+#else // !DLL_EXPORT
+#ifdef LIBCDR_VISIBILITY
+#define CDRAPI __attribute__((visibility("default")))
+#else
+#define CDRAPI
+#endif
+#endif
 
 #endif
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

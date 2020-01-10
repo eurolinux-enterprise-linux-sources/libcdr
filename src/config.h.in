@@ -10,6 +10,9 @@
 /* Define to 1 if you have the <boost/property_tree/ptree.hpp> header file. */
 #undef HAVE_BOOST_PROPERTY_TREE_PTREE_HPP
 
+/* Define to 1 if you have the <boost/scoped_ptr.hpp> header file. */
+#undef HAVE_BOOST_SCOPED_PTR_HPP
+
 /* Define to 1 if you have the <boost/spirit/include/classic.hpp> header file.
    */
 #undef HAVE_BOOST_SPIRIT_INCLUDE_CLASSIC_HPP

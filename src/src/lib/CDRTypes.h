@@ -1,29 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #ifndef __CDRTYPES_H__
@@ -31,13 +12,13 @@
 
 #include <vector>
 #include <math.h>
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 #include "CDRTransforms.h"
+#include "CDRPath.h"
 #include "libcdr_utils.h"
 
 namespace libcdr
 {
-class CDRPath;
 
 struct CDRBox
 {
@@ -138,24 +119,24 @@ struct CDRLineStyle
   double angle;
   CDRColor color;
   std::vector<unsigned> dashArray;
-  unsigned startMarkerId;
-  unsigned endMarkerId;
+  CDRPath startMarker;
+  CDRPath endMarker;
   CDRLineStyle()
     : lineType((unsigned short)-1), capsType(0), joinType(0), lineWidth(0.0),
       stretch(0.0), angle(0.0), color(), dashArray(),
-      startMarkerId(0), endMarkerId(0) {}
+      startMarker(), endMarker() {}
   CDRLineStyle(unsigned short lt, unsigned short ct, unsigned short jt,
                double lw, double st, double a, const CDRColor &c, const std::vector<unsigned> &da,
-               unsigned smi, unsigned emi)
+               const CDRPath &sm, const CDRPath &em)
     : lineType(lt), capsType(ct), joinType(jt), lineWidth(lw),
       stretch(st), angle(a), color(c), dashArray(da),
-      startMarkerId(smi), endMarkerId(emi) {}
+      startMarker(sm), endMarker(em) {}
 };
 
 struct CDRCharacterStyle
 {
   unsigned short m_charSet;
-  WPXString m_fontName;
+  librevenge::RVNGString m_fontName;
   double m_fontSize;
   unsigned m_align;
   double m_leftIndent, m_firstIndent, m_rightIndent;
@@ -209,13 +190,13 @@ struct CDRPolygon
 
 struct CDRImage
 {
-  WPXBinaryData m_image;
+  librevenge::RVNGBinaryData m_image;
   double m_x1;
   double m_x2;
   double m_y1;
   double m_y2;
   CDRImage() : m_image(), m_x1(0.0), m_x2(0.0), m_y1(0.0), m_y2(0.0) {}
-  CDRImage(const WPXBinaryData &image, double x1, double x2, double y1, double y2)
+  CDRImage(const librevenge::RVNGBinaryData &image, double x1, double x2, double y1, double y2)
     : m_image(image), m_x1(x1), m_x2(x2), m_y1(y1), m_y2(y2) {}
   double getMiddleX() const
   {
@@ -225,7 +206,7 @@ struct CDRImage
   {
     return (m_y1 + m_y2) / 2.0;
   }
-  const WPXBinaryData &getImage() const
+  const librevenge::RVNGBinaryData &getImage() const
   {
     return m_image;
   }
@@ -306,7 +287,6 @@ struct WaldoRecordType1
 
 struct CDRCMYKColor
 {
-  CDRCMYKColor(unsigned colorValue, bool percentage = true);
   CDRCMYKColor(double cyan, double magenta, double yellow, double black)
     : c(cyan), m(magenta), y(yellow), k(black) {}
   ~CDRCMYKColor() {}
@@ -314,55 +294,44 @@ struct CDRCMYKColor
   double m;
   double y;
   double k;
-  void applyTint(double tint);
-  unsigned getColorValue() const;
 };
 
 struct CDRRGBColor
 {
-  CDRRGBColor(unsigned colorValue);
   CDRRGBColor(double red, double green, double blue)
     : r(red), g(green), b(blue) {}
   ~CDRRGBColor() {}
   double r;
   double g;
   double b;
-  void applyTint(double tint);
-  unsigned getColorValue() const;
 };
 
 struct CDRLab2Color
 {
-  CDRLab2Color(unsigned colorValue);
   CDRLab2Color(double l, double A, double B)
     : L(l), a(A), b(B) {}
   ~CDRLab2Color() {}
   double L;
   double a;
   double b;
-  void applyTint(double tint);
-  unsigned getColorValue() const;
 };
 
 struct CDRLab4Color
 {
-  CDRLab4Color(unsigned colorValue);
   CDRLab4Color(double l, double A, double B)
     : L(l), a(A), b(B) {}
   ~CDRLab4Color() {}
   double L;
   double a;
   double b;
-  void applyTint(double tint);
-  unsigned getColorValue() const;
 };
 
 struct CDRText
 {
   CDRText() : m_text(), m_charStyle() {}
-  CDRText(const WPXString &text, const CDRCharacterStyle &charStyle)
+  CDRText(const librevenge::RVNGString &text, const CDRCharacterStyle &charStyle)
     : m_text(text), m_charStyle(charStyle) {}
-  WPXString m_text;
+  librevenge::RVNGString m_text;
   CDRCharacterStyle m_charStyle;
 };
 
@@ -384,11 +353,11 @@ struct CDRTextLine
 struct CDRFont
 {
   CDRFont() : m_name(), m_encoding(0) {}
-  CDRFont(const WPXString &name, unsigned short encoding)
+  CDRFont(const librevenge::RVNGString &name, unsigned short encoding)
     : m_name(name), m_encoding(encoding) {}
   CDRFont(const CDRFont &font)
     : m_name(font.m_name), m_encoding(font.m_encoding) {}
-  WPXString m_name;
+  librevenge::RVNGString m_name;
   unsigned short m_encoding;
 };
 

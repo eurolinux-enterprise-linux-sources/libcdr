@@ -1,5 +1,5 @@
 %define name libcdr
-%define version 0.0.14
+%define version 0.1.1
 %define RELEASE 1
 %define release     %{?CUSTOM_RELEASE} %{!?CUSTOM_RELEASE:%RELEASE}
 
@@ -11,8 +11,8 @@ Source: %{name}-%{version}.tar.gz
 Group: System Environment/Libraries
 URL: http://libcdr.sf.net/
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
-BuildRequires: libwpd-devel >= 0.9.0, gcc-c++, libstdc++-devel, pkgconfig >= 0.9.0
-License: LGPL
+BuildRequires: librevenge-devel >= 0.9.0, gcc-c++, libstdc++-devel, pkgconfig >= 0.9.0
+License: MPL-2.0
 Prefix: %{prefix}
 
 %description
@@ -29,7 +29,7 @@ Currently supported: raw svg
 
 %package devel
 Requires: %{name} >= %{version}
-Requires: libwpd-devel >= 0.9.0
+Requires: librevenge-devel >= 0.9.0
 Summary: Files for developing with libcdr.
 Group: Development/Libraries
 
@@ -81,7 +81,7 @@ umask 022
 %defattr(644,root,root,755)
 %{_libdir}/libcdr*.so
 %{_libdir}/pkgconfig/libcdr*.pc
-%{_includedir}/libcdr-0.0/libcdr
+%{_includedir}/libcdr-0.1/libcdr
 
 %if %{!?_without_docs:1}%{?_without_docs:0}
 %files docs

@@ -6,8 +6,8 @@ AC_PREREQ([2.65])
 # Version informations
 # ====================
 m4_define([libcdr_version_major],[0])
-m4_define([libcdr_version_minor],[0])
-m4_define([libcdr_version_micro],[14])
+m4_define([libcdr_version_minor],[1])
+m4_define([libcdr_version_micro],[1])
 m4_define([libcdr_version],[libcdr_version_major.libcdr_version_minor.libcdr_version_micro])
 
 # =============
@@ -35,27 +35,46 @@ AC_CANONICAL_HOST
 
 PKG_PROG_PKG_CONFIG([0.20])
 
-# ====================
-# Find additional apps
-# ====================
-PKG_CHECK_MODULES([WPD],[
-	libwpd-0.9
-	libwpd-stream-0.9
+# ===============
+# Find librevenge
+# ===============
+PKG_CHECK_MODULES([REVENGE],[
+	librevenge-0.0 >= 0.0.1
 ])
-AC_SUBST(WPD_CFLAGS)
-AC_SUBST(WPD_LIBS)
+AC_SUBST([REVENGE_CFLAGS])
+AC_SUBST([REVENGE_LIBS])
 
-PKG_CHECK_MODULES([WPG],[
-	libwpg-0.2
+
+# =====
+# Tools
+# =====
+AC_ARG_ENABLE([tools],
+	[AS_HELP_STRING([--disable-tools], [Build conversion tools])],
+	[enable_tools="$enableval"],
+	[enable_tools=yes]
+)
+AS_IF([test "x$enable_tools" = "xyes"], [
+	PKG_CHECK_MODULES([REVENGE_STREAM],[
+		librevenge-stream-0.0
+	])
+	PKG_CHECK_MODULES([REVENGE_GENERATORS],[
+		librevenge-generators-0.0
+	])
 ])
-AC_SUBST(WPG_CFLAGS)
-AC_SUBST(WPG_LIBS)
+AC_SUBST([REVENGE_STREAM_CFLAGS])
+AC_SUBST([REVENGE_STREAM_LIBS])
+AC_SUBST([REVENGE_GENERATORS_CFLAGS])
+AC_SUBST([REVENGE_GENERATORS_LIBS])
+AM_CONDITIONAL(BUILD_TOOLS, [test "x$enable_tools" = "xyes"])
 
+# ==========
+# Find lcms2
+# ==========
 PKG_CHECK_MODULES([LCMS2],[
 	lcms2
 ])
-AC_SUBST(LCMS2_CFLAGS)
-AC_SUBST(LCMS2_LIBS)
+AC_SUBST([LCMS2_CFLAGS])
+AC_SUBST([LCMS_LIBS])
 
 # =========
 # Find zlib
@@ -98,6 +117,7 @@ AC_SUBST(ICU_LIBS)
 AC_CHECK_HEADERS(
 	boost/optional.hpp \
 	boost/property_tree/ptree.hpp \
+	boost/scoped_ptr.hpp \
 	boost/spirit/include/classic.hpp \
 	boost/property_tree/json_parser.hpp,
 	[],
@@ -163,6 +183,25 @@ AS_CASE([$host],
 )
 AC_MSG_RESULT([$platform_win32])
 AM_CONDITIONAL([PLATFORM_WIN32], [test "x$platform_win32" = "xyes"])
+
+AS_IF([test $platform_win32 == yes],
+    [],
+    [
+        AC_MSG_CHECKING([for -fvisibility=hidden compiler flag])
+        saved_CXXFLAGS="$CXXFLAGS"
+        CXXFLAGS="$CXXFLAGS -fvisibility=hidden"
+        AC_TRY_COMPILE([], [],
+            [
+                AC_MSG_RESULT([yes])
+                CXXFLAGS="$CXXFLAGS -DLIBCDR_VISIBILITY"
+            ],
+            [
+                AC_MSG_RESULT([no])
+                CXXFLAGS="$saved_CXXFLAGS"
+            ]
+        )
+    ]
+)
 
 # ================
 # Check for cflags
@@ -255,21 +294,6 @@ AS_IF([test "x$enable_debug" = "xyes"], [
 ])
 AC_SUBST(DEBUG_CXXFLAGS)
 
-# ============
-# Static tools
-# ============
-AC_ARG_ENABLE([static-tools],
-	[AS_HELP_STRING([--enable-static-tools], [Link tools (binaries) statically])],
-	[enable_static_tools="$enableval"],
-	[enable_static_tools=no]
-)
-AS_IF([test "x$enable_static_tools" = "xyes"], [
-	enable_static="yes"
-], [
-	AC_DISABLE_STATIC
-])
-AM_CONDITIONAL(STATIC_TOOLS, [test "x$enable_static_tools" = "xyes"])
-
 # =============
 # Documentation
 # =============
@@ -326,7 +350,7 @@ AC_MSG_NOTICE([
 Build configuration:
 	debug:           ${enable_debug}
 	docs:            ${build_docs}
-	static-tools:    ${enable_static_tools}
+	tools:           ${enable_tools}
 	werror:          ${enable_werror}
 ==============================================================================
 ])

@@ -1,38 +1,17 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* libcdr
- * Version: MPL 1.1 / GPLv2+ / LGPLv2+
+/*
+ * This file is part of the libcdr project.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License or as specified alternatively below. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * Major Contributor(s):
- * Copyright (C) 2012 Fridrich Strba <fridrich.strba@bluewin.ch>
- *
- *
- * All Rights Reserved.
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPLv2+"), or
- * the GNU Lesser General Public License Version 2 or later (the "LGPLv2+"),
- * in which case the provisions of the GPLv2+ or the LGPLv2+ are applicable
- * instead of those above.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
 #ifndef __COMMONPARSER_H__
 #define __COMMONPARSER_H__
 
 #include "CDRCollector.h"
-
-class WPXInputSTream;
+#include "CDRPath.h"
 
 namespace libcdr
 {
@@ -53,13 +32,14 @@ private:
 
 
 protected:
-  double readRectCoord(WPXInputStream *input, bool bigEndian = false);
-  double readCoordinate(WPXInputStream *input, bool bigEndian = false);
-  unsigned readUnsigned(WPXInputStream *input, bool bigEndian = false);
-  unsigned short readUnsignedShort(WPXInputStream *input, bool bigEndian = false);
-  int readInteger(WPXInputStream *input, bool bigEndian = false);
-  double readAngle(WPXInputStream *input, bool bigEndian = false);
+  double readRectCoord(librevenge::RVNGInputStream *input, bool bigEndian = false);
+  double readCoordinate(librevenge::RVNGInputStream *input, bool bigEndian = false);
+  unsigned readUnsigned(librevenge::RVNGInputStream *input, bool bigEndian = false);
+  unsigned short readUnsignedShort(librevenge::RVNGInputStream *input, bool bigEndian = false);
+  int readInteger(librevenge::RVNGInputStream *input, bool bigEndian = false);
+  double readAngle(librevenge::RVNGInputStream *input, bool bigEndian = false);
 
+  void processPath(const std::vector<std::pair<double, double> > &points, const std::vector<unsigned char> &types, CDRPath &path);
   void outputPath(const std::vector<std::pair<double, double> > &points, const std::vector<unsigned char> &types);
 
   CDRCollector *m_collector;
