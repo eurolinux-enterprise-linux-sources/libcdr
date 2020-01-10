@@ -151,6 +151,71 @@ void libcdr::CDRTransform::applyToArc(double &rx, double &ry, double &rotation, 
   }
 }
 
+double libcdr::CDRTransform::_getScaleX() const
+{
+  double x0 = 0.0;
+  double x1 = 1.0;
+  double y0 = 0.0;
+  double y1 = 0.0;
+  applyToPoint(x0, y0);
+  applyToPoint(x1, y1);
+  return x1 - x0;
+}
+
+double libcdr::CDRTransform::getScaleX() const
+{
+  return fabs(_getScaleX());
+}
+
+bool libcdr::CDRTransform::getFlipX() const
+{
+  return (0 > _getScaleX());
+}
+
+double libcdr::CDRTransform::_getScaleY() const
+{
+  double x0 = 0.0;
+  double x1 = 0.0;
+  double y0 = 0.0;
+  double y1 = 1.0;
+  applyToPoint(x0, y0);
+  applyToPoint(x1, y1);
+  return y1 - y0;
+}
+
+double libcdr::CDRTransform::getScaleY() const
+{
+  return fabs(_getScaleY());
+}
+
+bool libcdr::CDRTransform::getFlipY() const
+{
+  return (0 > _getScaleY());
+}
+
+double libcdr::CDRTransform::getTranslateX() const
+{
+  double x = 0.0;
+  double y = 0.0;
+  applyToPoint(x, y);
+  return x;
+}
+
+double libcdr::CDRTransform::getTranslateY() const
+{
+  double x = 0.0;
+  double y = 0.0;
+  applyToPoint(x, y);
+  return y;
+}
+
+librevenge::RVNGString libcdr::CDRTransform::toString() const
+{
+  librevenge::RVNGString output;
+  output.sprintf("[%f %f %f | %f %f %f]", m_v0, m_v1, m_x0, m_v3, m_v4, m_y0);
+  return output;
+}
+
 
 libcdr::CDRTransforms::CDRTransforms()
   : m_trafos()
@@ -188,14 +253,14 @@ bool libcdr::CDRTransforms::empty() const
 
 void libcdr::CDRTransforms::applyToPoint(double &x, double &y) const
 {
-  for (std::vector<CDRTransform>::const_iterator iter = m_trafos.begin(); iter != m_trafos.end(); ++iter)
-    iter->applyToPoint(x,y);
+  for (const auto &trafo : m_trafos)
+    trafo.applyToPoint(x,y);
 }
 
 void libcdr::CDRTransforms::applyToArc(double &rx, double &ry, double &rotation, bool &sweep, double &x, double &y) const
 {
-  for (std::vector<CDRTransform>::const_iterator iter = m_trafos.begin(); iter != m_trafos.end(); ++iter)
-    iter->applyToArc(rx, ry, rotation, sweep, x, y);
+  for (const auto &trafo : m_trafos)
+    trafo.applyToArc(rx, ry, rotation, sweep, x, y);
 }
 
 double libcdr::CDRTransforms::_getScaleX() const

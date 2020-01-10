@@ -1,3 +1,995 @@
+2017-09-15  David Tardon  <dtardon@redhat.com>  [30fa9bc78c1112ebb0a6778d0b8120b9a1fa8ab5]
+
+	cid#1371577 sanitize loop bounds
+
+	Change-Id: Iaeff2dbce1cd8b5cd5863c77ae20adf6eb698076
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [20577bbcc4738de4e106503de36993f17295c79b]
+
+	mention coverity in news
+
+	Change-Id: Id996a9d3aefb53332f7b0a4d0ccb8675180ce1dc
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [934860e0ebf70b675d09d60d283d74cb092106d8]
+
+	cid#1371578 sanitize loop bound
+
+	Change-Id: I8b474571483c5ac248d88832a24857b041f25319
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [af2b6648613d823efe299e35be386c05ceadf220]
+
+	cid#1371577 sanitize loop bound
+
+	Change-Id: I5c20f346fd92827a5c6aa923e2a6dfac15952f8e
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [ef10d79d0faed2a5d2578f52122449e78d3ffaf4]
+
+	cid#1371576 sanitize loop bound
+
+	Change-Id: I79a573b72be3894b596bff8979ff425727e0bdf9
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [c6908fcfa1f421e5c2d99f945e33cb79ca896f13]
+
+	cid#1371575 sanitize loop bound
+
+	Change-Id: Ifbbc3ec2b68a5966401e4f7b499b1eefda06fac2
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [8d1ba8a93df9f103d53ad6fd77c0b45b885889c1]
+
+	use smart pointers
+
+	Change-Id: I62a8d1a30338d6750ec71fcbbb8c120bfac74081
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [a4716f518ed4d8d9e1deff8dba7988715ffb46dd]
+
+	use smart pointers
+
+	Change-Id: I4420775d451cde8ccff88dffd25675dedd9d6df2
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [f36fc7377df7ae9b07a85457e035dc122996d4c9]
+
+	make this easier to use
+
+	Change-Id: I3166bba6b137bce7a39c3d8a2648fa943654740a
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [b51b2c3f55115ca61054fd8689c67939d4f3d999]
+
+	cid#1371571 sanitize loop bound
+
+	Change-Id: I4d943db17124508785044e0896f2ebe6e1258fb9
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [e5301b388190e7562e4cb0984e94e55636029f7d]
+
+	cid#1371573 sanitize loop bound
+
+	Change-Id: I590e6ef88f0489b8039e096e79b1c47a5edf3111
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [334cdf5093b093564bfc9f402ff46368b33ac091]
+
+	cid#1371579 sanitize loop bound
+
+	Change-Id: I1a34dcb7cd3de89e7ec484b759a9d81aefaf0dc6
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [0716f26b967a29dd8b4b843f092ede509c101d7e]
+
+	cid#1371574 sanitize loop bound
+
+	Change-Id: I6cf6ee216bb4d722912164a7f4a7b4099017e887
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [fdfcdd5ec28ba5e500be0b44d86ac926d2d86213]
+
+	cid#1371569 sanitize loop bound
+
+	Change-Id: I7e8a16c14f3c83b5eb05931d282a7798231ed410
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [ddeabcc6b0c4afe2629dc1f133adecac458ee2c8]
+
+	cid#1371572 sanitize loop bound
+
+	Change-Id: I5c4e36fac083f1e04301947cb52627c169fee719
+
+2017-09-15  David Tardon  <dtardon@redhat.com>  [0778dd3ab809bcc2fce0dabafefcab32ed4caa65]
+
+	cid#1371570 sanitize loop bound
+
+	Change-Id: Icebb0e8844c37934c9f73b9064e0a2f95b986654
+
+2017-09-14  David Tardon  <dtardon@redhat.com>  [2a505f7aee97b9d93db13f11bd378b4656ecc7f5]
+
+	prepare for release
+
+	Change-Id: Iad271352b4ad95bce253a7401c8efc55ae581525
+
+2017-09-10  Miklos Vajna  <vmiklos@collabora.co.uk>  [1377c874309ccfb8afcf33a73ca561f1827d95fd]
+
+	m4: MSVC defines __cplusplus as 199711L still
+
+	See e.g.
+	<https://stackoverflow.com/questions/37503029/cplusplus-is-equal-to-199711-in-msvc-does-it-support-c11>,
+	on MSVC we can't depend on the value of __cplusplus, since that one is a
+	too low value, even if everything else works fine.
+
+2017-09-08  David Tardon  <dtardon@redhat.com>  [d6b3911a7145c3712fb2a21347d9057fb9204c49]
+
+	assume modern enough ICU is available
+
+	Change-Id: Id1699583cf123ac48e9fdb93ff0e9fd64201633e
+
+2017-09-08  David Tardon  <dtardon@redhat.com>  [5c877eb154c80585ed09d7614964c3ae1c931004]
+
+	tests need librevenge-stream too
+
+	Change-Id: I3e5ddf2c19f27fe3201952d3ea2b732e4ebeda09
+
+2017-08-22  Miklos Vajna  <vmiklos@collabora.co.uk>  [ecb7b0ee27c32bb00945f43ca840fdd63cfc3dc0]
+
+	Convert explicit for loops to range-based ones where possible
+
+	Saves a few lines of redundant code.
+
+	Change-Id: I303893ace619703dc23e50e20eb44b0247b61b28
+
+2017-08-17  Miklos Vajna  <vmiklos@collabora.co.uk>  [3a93808cf271b5d39e91bd0606d1716d7d5b6ffb]
+
+	Convert 0 to nullptr where it's used as a pointer value
+
+	To make the code easier to read, because this means the remaining zeros
+	all mean numbers.
+
+	Change-Id: Ia1e06d3b1ce49603595459f78b2d400e0ba5bea8
+
+2017-08-16  Miklos Vajna  <vmiklos@collabora.co.uk>  [4be31f3c4c57fc8b9c8ae048b1b8f03b7d6db154]
+
+	Mark overriding member functions as 'override'
+
+	This does not affect the generated code (API or ABI), but:
+
+	1) Makes sure that in case the signature of one of these functions would
+	change by accident, the build breaks as the function no longer overrides
+	a base function.
+
+	2) Makes the code readable by explicitly marking all overriding
+	functions as 'override', where previously the reader had to read the
+	interface of the base class(es) as well to find out if the function is
+	virtual or not.
+
+	3) Since 'override' implies 'virtual', remove the 'virtual' keyword
+	where 'override' is present.
+
+	Change-Id: I21c123df891f582a0df624360d8ac3404186c2d0
+
+2017-07-29  David Tardon  <dtardon@redhat.com>  [0e23de6ce871a646f9e1f33b8b5ea90e30eb9e95]
+
+	suppress GCC 7 fallthrough warning
+
+	Change-Id: I6a1da60f75130e897191f20910aab9a3a46b5b57
+
+2017-06-20  David Tardon  <dtardon@redhat.com>  [04bd2943cc3a5e16736dd96a8c87852b82fe2983]
+
+	ofz#2246 avoid division by 0
+
+	Change-Id: Ieb643d124e3d934ee2f1c9e12d3e6e532a9dfc50
+
+2017-05-16  David Tardon  <dtardon@redhat.com>  [badddb69ec352d98d145e86577959d5523bdcc8d]
+
+	one definition of M_PI is enough
+
+	Change-Id: I9ad24445117ecd8bcbd00ce664029ddc392f4846
+
+2017-05-16  David Tardon  <dtardon@redhat.com>  [157f80cc4f4cd295588eba55bdcbe56889e9225a]
+
+	use a lookup table to get codepage from font name
+
+	Change-Id: Ia45f9aeb1d2993d751cf29e1855d640a90b3e2d3
+
+2017-05-16  David Tardon  <dtardon@redhat.com>  [622861c10a26941233ec120528c281e69605a355]
+
+	convert from Spirit.Classic to Qi
+
+	Change-Id: Id6dcd006cbc23f2928f0f7b0be90003dfd07f945
+
+2017-05-16  David Tardon  <dtardon@redhat.com>  [701116d56e4acea578fec5fc4205b406dd538b85]
+
+	sort lexicographically
+
+	Change-Id: Ia52662eddcb8672c07c60798341ddee5ffc90606
+
+2017-05-16  David Tardon  <dtardon@redhat.com>  [7d11cf51b0087efe295a180af6476eacb744d266]
+
+	drop :: prefix
+
+	Change-Id: I64cdccb97a3b130484a13bd7c713abc79cfed394
+
+2017-04-21  David Tardon  <dtardon@redhat.com>  [efe976ca8556426d1019caede0a3193647549dc8]
+
+	ofz#1211 avoid division by 0
+
+	Change-Id: I10e29fad157257c608b23f33ff5a0aa0125d3cb9
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [b21d189f482bdb3e7fee3d9ee6df6adc3f7185da]
+
+	drop unneeded include
+
+	Change-Id: I60ecaff1f8c29c1411edbdd389f85b5bd7e30dbe
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [5099c78dd0adb1d03f91afc43fc415224763db26]
+
+	replace manual def. of int types by boost
+
+	Change-Id: I6727cc9a44b4e6b442fb3c11d4a8949427caaed2
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [53288cb5a208402964a2a2944d3501731b565951]
+
+	move check for __attribute__((format)) to configure
+
+	Change-Id: I7ac89d2c40cb6b863ca31e1529ee3f261952c1e5
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [471dc14d9a868ab44702d600fd322bdba544aa3f]
+
+	drop verbose debug
+
+	Change-Id: I43829cf0146017d8b7d131aa2d85e6f0d703b913
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [18874143a46c479cbb82341d7aa6f29504db4725]
+
+	workaround difference in astyle versions
+
+	Change-Id: I6c517ba4956372538015712c3446818e3c443b88
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [dd25051dad8210771c58d3a7cbe4b98307018835]
+
+	this uses boost::optional so include the header
+
+	Change-Id: I9efafd00243dfaf25b9955a6c4a91c86028ad123
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [81371c41a555b299385c6809ae372ba602366c98]
+
+	boost::scoped_ptr -> std::unique_ptr
+
+	Change-Id: I4ce2fad3ed859cd5741074fea07038a50fd14a02
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [cfba12350ad88791ec64077ede9fbffb98885603]
+
+	switch to C++11
+
+	Change-Id: I049fc4bf37667192b0ae997ad150cde3632d8df3
+
+2017-04-15  David Tardon  <dtardon@redhat.com>  [0807415e3cd8d285c4c0c884363ea610e23a5ce7]
+
+	only ignore generated files in m4
+
+	Change-Id: Ibb9e5bf67157a0a5cb3989ed4e0e36027f702fb0
+
+2017-04-12  David Tardon  <dtardon@redhat.com>  [d3115eaf664eb01d03af1fe65c0c2680960b6ab7]
+
+	ofz#998 fix division by 0
+
+	Change-Id: I85c2888adf6289d6cfd23728d36e130a15f54368
+
+2017-04-08  David Tardon  <dtardon@redhat.com>  [0011e37abce90f84a0740413b951c5de8addcbc2]
+
+	ofz#1009 fix leak
+
+	Change-Id: If73e988e12a5be29a674495e4b7654ce6d8c5135
+
+2017-04-04  David Tardon  <dtardon@redhat.com>  [263b1707ba5506fe9b162404b84b8e6c7b8d6ef5]
+
+	ofz: avoid inf. loop if inst. size is 0
+
+	Change-Id: I688a580878227adcf267bca02b22a0b2e2434f36
+
+2017-04-04  David Tardon  <dtardon@redhat.com>  [f270338fcf07bdbf2d0fa1f4b7dd8aed8eedcfd6]
+
+	ofz: avoid inf. loop if tag length is 0
+
+	Change-Id: If5a6644de892a466b5bd54ab3c807b6149aace8e
+
+2017-04-04  David Tardon  <dtardon@redhat.com>  [77704c5f26a1019ddc8014a84113a3387c52fe3e]
+
+	astyle
+
+	Change-Id: I4b1ee173e3c795fa2ba23f333e2e93cd392907af
+
+2017-03-30  David Tardon  <dtardon@redhat.com>  [bc0877e937c29253758b7abd609d4b030efdaba0]
+
+	add cmx fuzzer
+
+	Change-Id: I0c7d84c9b3941ba892981fd69e503eb5ea8734cf
+
+2017-03-30  David Tardon  <dtardon@redhat.com>  [38d14756cfc03b3e827963f854b0233f38872aaf]
+
+	create a fuzzing driver for oss-fuzz
+
+	Change-Id: I0c89a14828fb25b7a6b0d16bf4055b8dd49e1013
+
+2017-03-16  dennisroczek  <dennisroczek@libreoffice.org>  [bc4bc8cd02c7065143c2a236f5d949dcfb04a07f]
+
+	fix typo: "the the" --> the
+
+	Change-Id: Iae95a5b48548a3c3613b69dae5045d287faab736
+	Reviewed-on: https://gerrit.libreoffice.org/35167
+	Reviewed-by: Julien Nabet <serval2412@yahoo.fr>
+	Tested-by: Julien Nabet <serval2412@yahoo.fr>
+
+2017-03-12  dennisroczek  <dennisroczek@libreoffice.org>  [2f69b5b8357bd30a76f9ff07acb2889e12feab82]
+
+	fix typo: usefull --> useful
+
+	Change-Id: Ib6b8be0502a905b4ca7c6f8f2d4213f3a85c4c4f
+	Reviewed-on: https://gerrit.libreoffice.org/34997
+	Reviewed-by: Adolfo Jayme Barrientos <fitojb@ubuntu.com>
+	Tested-by: Adolfo Jayme Barrientos <fitojb@ubuntu.com>
+
+2017-02-23  David Tardon  <dtardon@redhat.com>  [247a26e11c1d31002cdef5c7ab65a8b259519d9b]
+
+	tdf#106118 update README
+
+	Change-Id: I16b1b9f0eefffb9b6b8460cb99bc18049dd1634b
+
+2016-07-21  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [8d3311cf94f79e97373732d764d65502ef8a941b]
+
+	Prepare for 0.1.3
+
+	Change-Id: Iebd1617a94ff46d976f8042b4be4b2b12c65fd96
+
+2016-07-20  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [114c8366a2ca6f664d5c13aba5ee1066e9b86633]
+
+	Fix a thinko
+
+	Change-Id: I3f75add6454e1d9be7d9e2971dd7232e18e4c6e3
+
+2016-07-20  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [3eb9b6eb8e9855661eb505ffeb29cd7860ed5b9d]
+
+	Full-Color and Imported Bitmap have similar structure
+
+	Change-Id: I989bdc58eb88ce68e7fc3a64ddb7d3d46572b7ac
+
+2016-07-20  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [f568a1a6ecab5200f9c7443887dc7fb623beb060]
+
+	let the cmx2* and cdr2* handle both cdr and cmx
+
+	Change-Id: I55d0cc0eeadd59a65d1141d9c9b7e14279072c7f
+
+2016-07-19  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [02eabaedfa4099cec304ecfae8dd0b25a6988fef]
+
+	Setting a framwork for parsing of vector fills
+
+	Change-Id: Ic8fea5796fff6fae0cd5dbbef0b9a4cf0e0a779b
+
+2016-07-18  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [4c41d9c89edeaa96208c68e3d1b0c1849c7c1c42]
+
+	Assure that we know fill/line properties when parsing the full colour fill
+
+	Change-Id: I6bf3f779a9e846d3aa476a91989046757aebe58b
+
+2016-07-18  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [296365202a94801885625350817522c2d6ef1587]
+
+	If not line/fill is specified, thy the styles first
+
+	Change-Id: I54a687cedf5c2a6b0a93ad578158762b317279ee
+
+2016-07-18  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [7f4bf72e375dee3f7004700ab6102f25720f154a]
+
+	Put the styles into the parser state struct
+
+	Change-Id: I72b7ddd9a7d9317f4379f5bd1a810db1f7ab4288
+
+2016-07-18  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [46fdb6b2504457b8bcedbe7eb37d9f9d2132a08d]
+
+	This is not only for char styles
+
+	Change-Id: I46b13bd768d4bb87c2787a1d1f8936f8055dd1c3
+
+2016-07-14  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [ca6444d0c64a75120bf40ad2c4df66556ff166ca]
+
+	This does not look like used
+
+	Change-Id: I4af4f9118d18ac15af228d9586b15d1c31e896a1
+
+2016-07-14  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [8a131e5f479607274ec635b9a5b956cf9bee15a5]
+
+	Best solution before we implement Stlt for graphics
+
+	Change-Id: I8ac1a2da7fba7894733e0c264017628e653fcd16
+
+2016-07-14  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [f8f4d0de572304d8bcddd68eff174bec7d4d9a55]
+
+	Annotate not to forget to handle default styles
+
+	Change-Id: I7e0b5e67000911eac568bf6d08f27982766dc29d
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [3512a0c9cdf2d824c54bb3ef1b172010cb40cd97]
+
+	If no outline is specified, it means no outline
+
+	Change-Id: I38a6bd11ffe7876c1953b8705f26d1757d13f93e
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [1a6e34eb30f1c701f520c6656825f505591cc603]
+
+	Basic transparency lens for CMX
+
+	Change-Id: I8dd05b59e34e829b93be69e0eca5dae3e2c2236c
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [1fa184091a72d7cb91f4968e216dba0a6ff15907]
+
+	Some endianess fixes
+
+	Change-Id: I9060d9f14d980c1dd1e5355249bee7736dcf9509
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [1133f4e3596c8225af6b046385fba0c746774a29]
+
+	Parse even the pages from the index
+
+	Change-Id: I2482141e4c63db6e85d86248a969d332fca12650
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [98ef714234b005f89f71fed9bde5a8c6187ef3fd]
+
+	More infrastructure for parsing from index section
+
+	Change-Id: I1a822e0a3a567f736a01bbab6259d8e4d694459a
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [a9dc0718f68bac96144d15e2b6165fc1ae83d6d1]
+
+	Defines for sections
+
+	Change-Id: Ib3ce9f075b726aaa0916f0caf720f031210a11da
+
+2016-07-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [f9a78854aba45c2dc6a5a29eea1d57a689e2ed5f]
+
+	Start the infrastructure for parsing from index section
+
+	Change-Id: I9009d6d2f24a91dc8a56418c8b7cc7cd4165fefd
+
+2016-07-08  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [27c91911554d8617199374bc077ece478b618aaf]
+
+	Consider pen transform
+
+	Change-Id: I7b09d9347a14c99493019d28d0f39955c668712f
+
+2016-07-08  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [a53bff7f33f65b4f9ebb9c396d5df9e73f9bbd8a]
+
+	No need of a special ccmm reader
+
+	Change-Id: I65c4a4a1b66e24a5b518153eaa7d03de2ddffd8a
+
+2016-07-08  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [d839ee0e10d9b647db59f9c86e152931997f0b8e]
+
+	In some CMX files, there are stray BeginEmbedded/EndEmbedded between records
+
+	Change-Id: Ic2116a3ea3d21b188def26e3f4577b06be3921a2
+
+2016-07-07  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [bfed80a9c4e652141b6f1ce07c8785faf70d23be]
+
+	Some fixes
+
+	Change-Id: Ie4764e479f47483fa7e11ff276d4cf882dc1572d
+
+2016-07-07  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [720d10069858be2704beb634f9e0bcfe67baad3d]
+
+	Draw Image in CMX
+
+	Change-Id: I214bbf91bab95bf0bbc5bbdfc6e9a4e6e08ec1f0
+
+2016-07-07  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [6315f089f7c8bf54d9ae12e885d54a46de776e00]
+
+	Fix debug messages
+
+	Change-Id: I6bb9661fc6ce279c8b55778c24f53ded6610cbb8
+
+2016-07-07  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [cf4caa873d4d47b280ce26aa0ee24272693c3e8a]
+
+	Some CMX bitmap fills
+
+	Change-Id: Ib5371a73ec22473015526b0de8b49a2d23ccd3ae
+
+2016-07-06  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [0e99e41d39dd832afb7f53c9ee66aa368c1395ca]
+
+	Extract RImage reader to CommonParser
+
+	Change-Id: Id283839fc39857c29e15795ecae2665a7cb4f6dc
+
+2016-07-06  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [30d34d321edace0301507a4428f0865a5369c097]
+
+	Simplify
+
+	Change-Id: I6c133797ce4fd628d19e8dc958df12483bfacb82
+
+2016-07-06  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [71a4665df6cae7c19fe999dd18e5434b2d2dd4ff]
+
+	While CDR is drawn in reverse order, CMX is not
+
+	Change-Id: Ie4b2d34831220232eda336f52e161749b82c0f19
+
+2016-07-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [cf5a6c388946eb4b3a719bbd2bac896508f087a7]
+
+	Some image parsing
+
+	Change-Id: I52bd0a205d54385208eb788f47b75647b194a988
+
+2016-07-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [b1fca19af9165e515ee09810d45c413b7004c82b]
+
+	Parse Image
+
+	Change-Id: I125c55bc76565f29ca350c4378951e8f2952740f
+
+2016-07-05  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [8e9206a36518cf88cc1d31656fe1ab0bd450b445]
+
+	ixtl and ixef readers
+
+	Change-Id: I65ce400381cf64d9626b275a1c7eb033d5806265
+
+2016-07-04  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [453c92e29f007bb809aee6c8ed0ab7400f9a2215]
+
+	Add fourcc for index tables
+
+	Change-Id: I5246ebd00504baa5733c77a2724c90e2028cd517
+
+2016-07-03  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [078a61abd6b344ae4e3200e7068681c3dbcb125b]
+
+	Outline styles
+
+	Change-Id: I965cbe957fc359dfc6721a5fe74ae21b3d241333
+
+2016-07-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [6c1e337b20f11b86e5356cc4b43ad0f715e77326]
+
+	rotl reader
+
+	Change-Id: I545b82951cb7af6338be16d134ed821deb24320e
+
+2016-07-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [190f8ba5f6373381f667f680ec457712682288d2]
+
+	rpen reader
+
+	Change-Id: Ibba0239f8fdcd1a8728b7c0acfa69405a7270347
+
+2016-07-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [c5c804ea40039b2e6ce9b603a65fcb79d4a36178]
+
+	rott reader
+
+	Change-Id: I1d22bf5e5f02eedb0f799516bd91a58569b7f352
+
+2016-07-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [7b389bf71f76dd3909bd848fe3defbc3acb5cd95]
+
+	Rdot reader
+
+	Change-Id: I44bd901a4c6f1bfa5e70b19f6e9d17d88bd935e0
+
+2016-07-02  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [14a8e1c087ede5bd94dcd54558507c95a3e78424]
+
+	Try to skip not yet supported fills correctly
+
+	Change-Id: I81bfe7fb177812e8c4114bfd51275cd9c4c980cf
+
+2016-07-01  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [79cd1211c2bb118280c7da2d228a7f592df03295]
+
+	Extensible parser state for CMXParser
+
+	Change-Id: I52706b557c449b8ef6850bf29b2943df83c43741
+
+2016-07-01  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [6dca9a478ba231c30529ebad130097b143263ad8]
+
+	Fountain (gradient) fill for CMX
+
+	Change-Id: I8bb0a2689fea2401cbdced6158a326f4e97169ab
+
+2016-07-01  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [2d5d2dc005625b30a82e5a7baee1f2deac9964bf]
+
+	Try not to output bogus shapes in CMX1 when we cannot parse rendering
+
+	Change-Id: Ieeaa3a53f7fa364d6107239a53219e6544e9603f
+
+2016-06-30  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [426554639786a0fd18ed1f0818888e478564ca11]
+
+	Some fill attributes + some fixes in CMX1
+
+	Change-Id: I2ae0d2fe17c706396a02fd317695d411e4e1a680
+
+2016-06-30  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [fe3247f88f940990557d7822899d50483960c653]
+
+	missing break
+
+	Change-Id: I6ed22efb32a75225c7cfd15a80637613e0483913
+
+2016-06-30  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [90c1937b9bd954a09d180c3dcefe39401f9a2019]
+
+	Initial implementation of fills in cmx v6
+
+	Change-Id: I359cd6509fe52f1b48c2d4367850c85ba16492d0
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [b6da4cf3b1146170e72c536849d7288376fbd410]
+
+	coverity#1219668 untrusted loop bound
+
+	Change-Id: If827834918cd2bd54ead2947b0e0cc68a8299983
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [d3c79d44d07776eac7c2ae93448806e7533d4029]
+
+	coverity#1219668 untrusted loop bound
+
+	Change-Id: I75eb0259dfe86998d9447987540cabc53ca79cd1
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [cd98b72f3293c4fd81bdf51f7ca3f347baa52536]
+
+	coverity#1219668 untrusted loop bound
+
+	Change-Id: I1d493b4c6d79f16c5ed5d68f23efd4b14e85da7a
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [525cd4a1a868bbf29c511ab00669518aa9818073]
+
+	coverity#1219658 untrusted loop bound
+
+	Change-Id: Ibbe274f8ef136a42f290c41806224f6f6f93dcfb
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [c6ef8e3f7ca896b3be34c29e4bb8cee1deed4026]
+
+	coverity#1219657 untrusted loop bound
+
+	Change-Id: I8fdc5ec1b1c02124594faa845b89c851307499ba
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [5b43f6dabdf65be376de3ece7ab24fd7a5e94b83]
+
+	coverity#1219656 untrusted loop bound
+
+	Change-Id: I949c0bc68aec676f0bff78d284738b6e384f2973
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [776ce0dfcc23cead3e57ee781e924bac4eee74d0]
+
+	avoid reallocations
+
+	Change-Id: If01ca063b2f29ccf8d3ecf473e7d351c5b653bb5
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [5f23be87e2b13319a7751f25ce3c88165a52bb9d]
+
+	coverity#1219652 untrusted loop bound
+
+	Change-Id: I9a9c6406b5e2ed2616075e97001701bb45c4ccd2
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [6f28e50debdf1f0a44f5fa7ed7e43a6d50b20e84]
+
+	add missing break
+
+	Change-Id: I26f64966bb510588610c3f48770e3cf6636aa638
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [af5ef20d8a0ac1c7cae2bc493156d299f246b214]
+
+	prepare for a release
+
+	Change-Id: Id180c188c4c2675ab96417d1b4f2ea8f0052eae5
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [b2e5cbf18b4eb690fb2704bfaa3215075863b23c]
+
+	make help output even more help2man-friendly
+
+	Change-Id: I6dbe0ddcf67b91e67c2427cfa78c271f77a56433
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [5acb80e5e2a930fa6ccb50da39aafc57b429e6e6]
+
+	make help output more help2man-friendly
+
+	Change-Id: Icf52fbf7222f155e5f0cb25c3da3053f5962dc2e
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [f56526a10105b06a03379ba28249cd1192e194c6]
+
+	avoid out-of-bounds access
+
+	Change-Id: Idbf93398707eac0ed5b861366f3713c5af2957f9
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [ab3ca672deeb0308d09faba93d1af2bdf66a3ae8]
+
+	shorten the expressions a bit
+
+	Change-Id: I2da1425b07333a58be1b5dd75d1cae295a943911
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [bb36ded402e8de6770042ba1dfe18da1d8430530]
+
+	drop obsolete code
+
+	Change-Id: I16d4a9b63fbc9bcef4a60b8ab880e5c72ff1127a
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [96efcc9a1a166c0e8c94282b84bdd5094401ce68]
+
+	tdf#67873 do not drop empty text lines
+
+	Change-Id: I667ff13e01ae3b47b62267ad0c911d9d806d0cb6
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [d006b719a063460ed717caf4b464de7940d4d73c]
+
+	add test-driver to .gitignore
+
+	Change-Id: I2d93112ebbcaf1bf04338cdc85cd45fc76ab9f38
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [72f8053c53885a92e2e0843fa277bdb96d4ad6fa]
+
+	print debug messages to stderr
+
+	Change-Id: Iead7aaad540e8fd11d3a531a0ce5db3323fe92b3
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [16bad14a0bdd8a7370ff73e8d191fa7ac53b5430]
+
+	coverity#1219668 untrusted loop bound
+
+	Change-Id: I820f0795bdf185aafcefdad9c4dbd7e5087fb249
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [8d465b41201c97df55916f577e34b3f51e48eae0]
+
+	avoid reallocations
+
+	Change-Id: I5f5c5c5f07cee25e7ae4217e69d91e21345c80d3
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [ba194ca9b857e2b126bb9d4779dfeb634ff49c63]
+
+	coverity#1219667 untrusted loop bound
+
+	Change-Id: I869570d2591801e244a16cda41583c0b11f4f1ec
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [506d632fc882b0df456099bf7bf5f9c3df7cd5fb]
+
+	avoid reallocations
+
+	Change-Id: Icd13d0b6d80e93627fc11a6f500a7282961d9aa1
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [a68dd3b0ded47e84d1d1b5bda45b3a76d565bc62]
+
+	coverity#1219666 untrusted loop bound
+
+	Change-Id: Ic059fe02f4ca3443317e9aa445071bbaf5c6065c
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [a6db148517331a0a0792b57dfcb2f2722b303423]
+
+	avoid reallocations
+
+	Change-Id: I4becdb665e7cad78e08f51ad1cd8fd332ab46032
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [5609b383d5555dcff937d96817cd2de5307f54aa]
+
+	coverity#1219665 untrusted loop bound
+
+	Change-Id: I3ec8ed97fc2178eaae72b00758a8b08f8703fcb8
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [c3a503fc3b5495cd1886e153cccefd3be54dc5df]
+
+	avoid reallocations
+
+	Change-Id: Iab341d0c495a3def2b4a3800315675c4dc822d17
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [cf936b4e64c031ce28fb5916b836f06ce98bfa9e]
+
+	coverity#1219664 untrusted loop bound
+
+	Change-Id: Icfa2357a80b2cd5e813c8192741e3b01dd70c313
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [edd055130ffeba0be89ac7a091c5b424b94423e8]
+
+	avoid reallocations
+
+	Change-Id: I130648296cafee9f8329dd15159978fe1dc5a352
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [d392829184cc722d96fada1ef13917d80d4eb4d6]
+
+	avoid reallocations
+
+	Change-Id: I910463483ff22b4e0b09f6a6489da4883f30f4fb
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [7647a34501633a9b45ab6c05ba9976d5cea49982]
+
+	coverity#1219661 untrusted loop bound
+
+	Change-Id: Id67d1781602534450b2688cce78c49e5b2d05958
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [108fa56a9c270319e51654a35e66ce6127be99e7]
+
+	avoid reallocations
+
+	Change-Id: If01040b0aedd5ec7af4fb9c1de2b8f0417011dfd
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [e73a6e2045e5aa2e900eefadb3632e8011c948e9]
+
+	coverity#1219660 untrusted loop bound
+
+	Change-Id: Icdaf38a7880be84943eb6190cf05ec460e787dd6
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [9e9f038acfc13c0a636cdf1083255b9f78e2f7ae]
+
+	avoid reallocations
+
+	Change-Id: I7d944c7378a826a9ae237ff63a54c5f1c16b9c97
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [04282ed1fca09b7530158fc7c319d6f1a9421a15]
+
+	coverity#1219659 untrusted loop bound
+
+	Change-Id: I560231a5ab6b39c2a0e3cddf1f1eec9cce60207d
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [d0ddef4c3a109f5dec9bf8cb6518ec423a4e393b]
+
+	coverity#1219658 untrusted loop bound
+
+	Change-Id: I9f1513dfd19ffe20eb1755d0b33831448654f080
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [8df03619d14f702299e05a34a8fd580e34e3481f]
+
+	avoid reallocations
+
+	Change-Id: Ibf3a9908df5acd1afe0ebc1d9491d59e6dd40e43
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [46b4248bbd9b73404d1df6ccda9e730cccc7bab8]
+
+	coverity#1219657 untrusted loop bound
+
+	Change-Id: Ie645106ddd3da591942de6bbebc6062618107df5
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [6f6922a41a36afe14b1328262cad61e8bb6b4ceb]
+
+	avoid reallocations
+
+	Change-Id: I6162bb9a82840e50875b374abbc9a8be47241974
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [fb92384a2378c8296950347a9e4d471524dc0bd7]
+
+	coverity#1219656 untrusted loop bound
+
+	Change-Id: I951f4f238ad8c6c725616f31a6fc07a86e712584
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [c5103abeccf54dd5d6359650344fca312c95ebca]
+
+	coverity#1219655 untrusted loop bound
+
+	Change-Id: I67b1596a2fada66cee39fc042e44feea81b7e5c7
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [f2580487380dd73a90f8d0f95a810e0f8d6ea0ad]
+
+	coverity#1219653 untrusted value as arg
+
+	Change-Id: Ifd2ae6290a719a0d3577d0b6ef2014a781a957fb
+
+2015-12-25  David Tardon  <dtardon@redhat.com>  [1412a339e0d77bc13eb09ee5b92fefd34f5ba944]
+
+	coverity#1219652 untrusted loop bound
+
+	Change-Id: Ic76fe5b502c9c2ca12e2d0905c3d680a591c2052
+
+2015-12-23  David Tardon  <dtardon@redhat.com>  [2c9213f3747093f0f6d91541c17a24269f5f46e9]
+
+	coverity#1219662 untrusted loop bound
+
+	Change-Id: Iff5a8739581c3a996a910e642a5db6eab0976bb6
+
+2015-12-13  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [882a4b3f83a4b5097da53670c720a26f4e2750eb]
+
+	Some boost 1.59 fixes
+
+	Change-Id: I0054c977a6d8ff5a9b93c147578e890476365999
+
+2015-08-30  David Tardon  <dtardon@redhat.com>  [f862293ad576d5f35a3c9e90fba762abeccaa1f0]
+
+	rhbz#1258127 fix build with boost 1.59
+
+	Change-Id: I3c9be843d8fcc17650022f4189b68fde28ee3d42
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [518a4c52ff5bb841f74339ead214f544ec9f1dde]
+
+	afl: avoid infinite loop with big numbers
+
+	... for which x - 1.0 == x due to rounding.
+
+	Change-Id: I98930077a5b47dc9e49ae6ac78e6b19177c7b56c
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [e13f0f01b29d4487525998f9f0ff0dc895155f4b]
+
+	afl: postpone alloc. till we get the data
+
+	Change-Id: Ic54f3b1e7e4f08d23a44ad65e855286ebf659fb2
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [334a6c12f3466828a3acb384d9b8bcac664b555f]
+
+	afl: postpone alloc. till we get the data
+
+	Change-Id: I10412cb64fea97a7271abc8d1cd721c09cfad423
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [47d2e94deb1e633a15e31ffd3345895bcb80cdb6]
+
+	afl: sanitize size before using it to alloc. a vector
+
+	Change-Id: I83086ec45babe6fc908b1aa658cdae06e8e241dc
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [0fa9c7c9678a3d3ca797217db013e6290de7bcdb]
+
+	afl: postpone alloc. till we get the data
+
+	Change-Id: I8b4471f3b8846a92f6b0e71e4e9372471fc2cb35
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [11a9e1bf12237d983f606826c444973e54bf879e]
+
+	afl: sanitize size before using it to alloc. a vector
+
+	Change-Id: Ie4eac6f2c72f192716d48c2f593666b5d65a7cab
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [6775c795d1930ef8c585ed972c96b862aa8d31bc]
+
+	afl: sanitize length before reading string
+
+	This avoids potential creation and manipulation of large buffers.
+
+	Change-Id: Iac2fa879a65bc2ec2a91c191398e4181f0aa9fd1
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [bf32c68489887f2a1c10a93630bd3b6409ae9d8d]
+
+	use stricter checks in Styd parser too
+
+	Change-Id: Ib28e586f8569d85264d3c64d2de661a527f97a8b
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [5d204827bbcb4466d3845bb7655d74531094b901]
+
+	use stricter checks in Loda parser too
+
+	Change-Id: I73f566ea7fab30d04510a0eb41bd6c314feff4b9
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [6611e91b52506820b9ded09f0c45810ab7c4ad98]
+
+	afl: improve sanity check
+
+	Change-Id: I58d8100c4e6e5d15464df6868625fffe8b51d947
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [65d6b995beb37236301edd9ecdaab9161e58eb96]
+
+	add unit test for the internal stream
+
+	Change-Id: I2811ea0fcf013882af202a39cd0664f81b2ef1d3
+
+2015-08-17  David Tardon  <dtardon@redhat.com>  [b6a295e599f93f6ff6fcda489c1c34479c846728]
+
+	impl. seek-to-end in internal stream
+
+	Change-Id: Id2401fd09bd2d4a5c54caeb2502932969d9e61f8
+
+2015-08-14  David Tardon  <dtardon@redhat.com>  [5ce6bb2daefef06139073a257d54843705eb9993]
+
+	afl: avoid out-of-bounds access to vector
+
+	Change-Id: I0356716036eb9c32a87c7a376488037abe9c5eab
+
+2015-08-14  David Tardon  <dtardon@redhat.com>  [70218f37edbd521685722dafa7cc84f8aaae2280]
+
+	afl: leave early if there is nothing to read
+
+	Change-Id: I3eb575369c52a85c3f784fca66edfe5548b045d1
+
+2015-08-03  David Tardon  <dtardon@redhat.com>  [847ed41df0cd654568699e57c88c8d4849af8007]
+
+	afl: avoid loops when parsing waldo structure
+
+	Change-Id: I9737af9453ab01ab5e121ac705eea5ba5663245b
+
+2015-08-03  David Tardon  <dtardon@redhat.com>  [4c814c054885be4e31d275eac76e96d7e2c66d0f]
+
+	afl: avoid division by 0
+
+	Change-Id: I5ead8ab028a3bc950a39a4afd3e5b5d67977d540
+
+2015-08-03  David Tardon  <dtardon@redhat.com>  [c324241165636572270b23427100237b021f91cc]
+
+	add make astyle target
+
+	Change-Id: I35859b9856f61c8aee36926f97d80847a5b54eef
+
+2015-08-03  David Tardon  <dtardon@redhat.com>  [d69481c8a80ae46bc5a02441a926243627e3b7da]
+
+	add tags to .gitignore
+
+	Change-Id: I4754b1b6c570902ccb83f9d91a0a1967c6d6a5d1
+
+2015-05-21  Fridrich Štrba  <fridrich.strba@bluewin.ch>  [a6cf808851bfcca527011ec45e3b3f6ba4960e49]
+
+	RVNGBinaryData is a valid type for RVNGPropertyList value
+
+	Change-Id: Icbc4c13c589dc21eac16bee83041444a6916e8d7
+
+2015-02-02  David Tardon  <dtardon@redhat.com>  [80c7842c7a79c0e3b66962d5c54ef89ff759723d]
+
+	remove bashism
+
+	Change-Id: I795bf489517e6cadb5efa0e6a80072d1063ff50b
+
 2014-11-24  David Tardon  <dtardon@redhat.com>  [06f9844bd62f718bed85ca74d3769f73b5b9b2ab]
 
 	prepare for a release

@@ -7,6 +7,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <map>
 #include <string>
 #include <string.h>
 #include <libcdr/libcdr.h>
@@ -65,15 +66,16 @@ CDRAPI bool libcdr::CMXDocument::parse(librevenge::RVNGInputStream *input, libre
   input->seek(0, librevenge::RVNG_SEEK_SET);
   CDRParserState ps;
   CDRStylesCollector stylesCollector(ps);
-  CMXParser stylesParser(&stylesCollector);
+  CMXParserState parserState;
+  CMXParser stylesParser(&stylesCollector, parserState);
   bool retVal = stylesParser.parseRecords(input);
   if (ps.m_pages.empty())
     retVal = false;
   if (retVal)
   {
     input->seek(0, librevenge::RVNG_SEEK_SET);
-    CDRContentCollector contentCollector(ps, painter);
-    CMXParser contentParser(&contentCollector);
+    CDRContentCollector contentCollector(ps, painter, false);
+    CMXParser contentParser(&contentCollector, parserState);
     retVal = contentParser.parseRecords(input);
   }
   return retVal;

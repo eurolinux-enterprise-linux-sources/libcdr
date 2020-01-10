@@ -15,10 +15,6 @@
 #include "CDRInternalStream.h"
 #include "libcdr_utils.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 #ifndef DUMP_PATTERN
 #define DUMP_PATTERN 0
 #endif
@@ -27,17 +23,49 @@
 #define DUMP_VECT 0
 #endif
 
-libcdr::CDRContentCollector::CDRContentCollector(libcdr::CDRParserState &ps, librevenge::RVNGDrawingInterface *painter) :
-  m_painter(painter), m_isDocumentStarted(false),
-  m_isPageProperties(false), m_isPageStarted(false), m_ignorePage(false),
-  m_page(ps.m_pages[0]), m_pageIndex(0), m_currentFillStyle(), m_currentLineStyle(), m_spnd(0),
-  m_currentObjectLevel(0), m_currentGroupLevel(0), m_currentVectLevel(0), m_currentPageLevel(0),
-  m_currentImage(), m_currentText(0), m_currentBBox(), m_currentTextBox(), m_currentPath(),
-  m_currentTransforms(), m_fillTransforms(), m_polygon(0), m_isInPolygon(false), m_isInSpline(false),
-  m_outputElements(0), m_contentOutputElements(), m_fillOutputElements(),
-  m_groupLevels(), m_groupTransforms(), m_splineData(), m_fillOpacity(1.0), m_ps(ps)
+namespace libcdr
 {
-  m_outputElements = &m_contentOutputElements;
+namespace
+{
+
+/// Move the number into [0;1] range.
+void normalize(double &d)
+{
+  if (d < 0.0)
+  {
+    const double n = d + static_cast<unsigned long>(-d) + 1.0;
+    if ((n < 0.0) || (n > 1.0))
+      d = 0.0; // The number was too big, thus rounded. Just pick a value.
+    else
+      d = n;
+  }
+  if (d > 1.0)
+  {
+    const double n = d - static_cast<unsigned long>(d);
+    if ((n < 0.0) || (n > 1.0))
+      d = 0.0; // The number was too big, thus rounded. Just pick a value.
+    else
+      d = n;
+  }
+}
+
+}
+}
+
+libcdr::CDRContentCollector::CDRContentCollector(libcdr::CDRParserState &ps, librevenge::RVNGDrawingInterface *painter,
+                                                 bool reverseOrder)
+  : m_painter(painter), m_isDocumentStarted(false), m_isPageProperties(false), m_isPageStarted(false),
+    m_ignorePage(false), m_page(ps.m_pages[0]), m_pageIndex(0), m_currentFillStyle(), m_currentLineStyle(),
+    m_spnd(0), m_currentObjectLevel(0), m_currentGroupLevel(0), m_currentVectLevel(0), m_currentPageLevel(0),
+    m_currentStyleId(0), m_currentImage(), m_currentText(nullptr), m_currentBBox(), m_currentTextBox(), m_currentPath(),
+    m_currentTransforms(), m_fillTransforms(), m_polygon(nullptr), m_isInPolygon(false), m_isInSpline(false),
+    m_outputElementsStack(nullptr), m_contentOutputElementsStack(), m_fillOutputElementsStack(),
+    m_outputElementsQueue(nullptr), m_contentOutputElementsQueue(), m_fillOutputElementsQueue(),
+    m_groupLevels(), m_groupTransforms(), m_splineData(), m_fillOpacity(1.0), m_reverseOrder(reverseOrder),
+    m_ps(ps)
+{
+  m_outputElementsStack = &m_contentOutputElementsStack;
+  m_outputElementsQueue = &m_contentOutputElementsQueue;
 }
 
 libcdr::CDRContentCollector::~CDRContentCollector()
@@ -46,6 +74,7 @@ libcdr::CDRContentCollector::~CDRContentCollector()
     _endPage();
   if (m_isDocumentStarted)
     _endDocument();
+  delete m_polygon;
 }
 
 void libcdr::CDRContentCollector::_startDocument()
@@ -87,10 +116,15 @@ void libcdr::CDRContentCollector::_endPage()
 {
   if (!m_isPageStarted)
     return;
-  while (!m_contentOutputElements.empty())
+  while (!m_contentOutputElementsStack.empty())
   {
-    m_contentOutputElements.top().draw(m_painter);
-    m_contentOutputElements.pop();
+    m_contentOutputElementsStack.top().draw(m_painter);
+    m_contentOutputElementsStack.pop();
+  }
+  while (!m_contentOutputElementsQueue.empty())
+  {
+    m_contentOutputElementsQueue.front().draw(m_painter);
+    m_contentOutputElementsQueue.pop();
   }
   if (m_painter)
     m_painter->endPage();
@@ -113,6 +147,7 @@ void libcdr::CDRContentCollector::collectObject(unsigned level)
   m_currentObjectLevel = level;
   m_currentFillStyle = CDRFillStyle();
   m_currentLineStyle = CDRLineStyle();
+  m_currentStyleId = 0;
   m_currentBBox = CDRBox();
 }
 
@@ -120,11 +155,19 @@ void libcdr::CDRContentCollector::collectGroup(unsigned level)
 {
   if (!m_isPageStarted && !m_currentVectLevel && !m_ignorePage)
     _startPage(m_page.width, m_page.height);
-  librevenge::RVNGPropertyList propList;
   CDROutputElementList outputElement;
-  // Since the CDR objects are drawn in reverse order, reverse the logic of groups too
-  outputElement.addEndGroup();
-  m_outputElements->push(outputElement);
+  if (m_reverseOrder)
+  {
+    // Since the CDR objects are drawn in reverse order, reverse the logic of groups too
+    outputElement.addEndGroup();
+    m_outputElementsStack->push(outputElement);
+  }
+  else
+  {
+    librevenge::RVNGPropertyList propList;
+    outputElement.addStartGroup(propList);
+    m_outputElementsQueue->push(outputElement);
+  }
   m_groupLevels.push(level);
   m_groupTransforms.push(CDRTransforms());
 }
@@ -132,7 +175,8 @@ void libcdr::CDRContentCollector::collectGroup(unsigned level)
 void libcdr::CDRContentCollector::collectVect(unsigned level)
 {
   m_currentVectLevel = level;
-  m_outputElements = &m_fillOutputElements;
+  m_outputElementsStack = &m_fillOutputElementsStack;
+  m_outputElementsQueue = &m_fillOutputElementsQueue;
   m_page.width = 0.0;
   m_page.height = 0.0;
   m_page.offsetX = 0.0;
@@ -173,7 +217,7 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     if (m_polygon)
     {
       delete m_polygon;
-      m_polygon = 0;
+      m_polygon = nullptr;
     }
     m_isInPolygon = false;
     if (!m_splineData.empty() && m_isInSpline)
@@ -389,12 +433,12 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     {
       y1 = m_currentBBox.getMinY();
       y2 = m_currentBBox.getMinY() + m_currentBBox.getHeight();
-      if ((*m_currentText)[0].m_line[0].m_charStyle.m_align == 2) // Center
+      if ((*m_currentText)[0].m_line[0].m_style.m_align == 2) // Center
       {
         x1 = m_currentBBox.getMinX() - m_currentBBox.getWidth() / 4.0;
         x2 = m_currentBBox.getMinX() + (3.0 * m_currentBBox.getWidth() / 4.0);
       }
-      else if ((*m_currentText)[0].m_line[0].m_charStyle.m_align == 3) // Right
+      else if ((*m_currentText)[0].m_line[0].m_style.m_align == 3) // Right
       {
         x1 = m_currentBBox.getMinX() - m_currentBBox.getWidth() / 2.0;
         x2 = m_currentBBox.getMinX() + m_currentBBox.getWidth() / 2.0;
@@ -427,11 +471,14 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
     textFrameProps.insert("fo:padding-left", 0.0);
     textFrameProps.insert("fo:padding-right", 0.0);
     outputElement.addStartTextObject(textFrameProps);
-    for (unsigned i = 0; i < m_currentText->size(); ++i)
+    for (const auto &i : *m_currentText)
     {
+      const std::vector<CDRText> &currentLine = i.m_line;
+      if (currentLine.empty())
+        continue;
       librevenge::RVNGPropertyList paraProps;
       bool rtl = false;
-      switch ((*m_currentText)[i].m_line[0].m_charStyle.m_align)
+      switch (currentLine[0].m_style.m_align)
       {
       case 1:  // Left
         if (!rtl)
@@ -458,22 +505,22 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
       default:
         break;
       }
-//      paraProps.insert("fo:text-indent", (*m_currentText)[i].m_charStyle.m_firstIndent);
-//      paraProps.insert("fo:margin-left", (*m_currentText)[i].m_charStyle.m_leftIndent);
-//      paraProps.insert("fo:margin-right", (*m_currentText)[i].m_charStyle.m_rightIndent);
       outputElement.addOpenParagraph(paraProps);
-      for (unsigned j = 0; j < (*m_currentText)[i].m_line.size(); ++j)
+      for (const auto &j : currentLine)
       {
-        librevenge::RVNGPropertyList spanProps;
-        double fontSize = (double)cdr_round(144.0*(*m_currentText)[i].m_line[j].m_charStyle.m_fontSize) / 2.0;
-        spanProps.insert("fo:font-size", fontSize, librevenge::RVNG_POINT);
-        if ((*m_currentText)[i].m_line[j].m_charStyle.m_fontName.len())
-          spanProps.insert("style:font-name", (*m_currentText)[i].m_line[j].m_charStyle.m_fontName);
-        if ((*m_currentText)[i].m_line[j].m_charStyle.m_fillStyle.fillType != (unsigned short)-1)
-          spanProps.insert("fo:color", m_ps.getRGBColorString((*m_currentText)[i].m_line[j].m_charStyle.m_fillStyle.color1));
-        outputElement.addOpenSpan(spanProps);
-        outputElement.addInsertText((*m_currentText)[i].m_line[j].m_text);
-        outputElement.addCloseSpan();
+        if (!j.m_text.empty())
+        {
+          librevenge::RVNGPropertyList spanProps;
+          double fontSize = (double)cdr_round(144.0*j.m_style.m_fontSize) / 2.0;
+          spanProps.insert("fo:font-size", fontSize, librevenge::RVNG_POINT);
+          if (j.m_style.m_fontName.len())
+            spanProps.insert("style:font-name", j.m_style.m_fontName);
+          if (j.m_style.m_fillStyle.fillType != (unsigned short)-1)
+            spanProps.insert("fo:color", m_ps.getRGBColorString(j.m_style.m_fillStyle.color1));
+          outputElement.addOpenSpan(spanProps);
+          outputElement.addInsertText(j.m_text);
+          outputElement.addCloseSpan();
+        }
       }
       outputElement.addCloseParagraph();
     }
@@ -481,11 +528,16 @@ void libcdr::CDRContentCollector::_flushCurrentPath()
   }
   m_currentImage = libcdr::CDRImage();
   if (!outputElement.empty())
-    m_outputElements->push(outputElement);
+  {
+    if (m_reverseOrder)
+      m_outputElementsStack->push(outputElement);
+    else
+      m_outputElementsQueue->push(outputElement);
+  }
   m_currentTransforms.clear();
   m_fillTransforms = libcdr::CDRTransforms();
   m_fillOpacity = 1.0;
-  m_currentText = 0;
+  m_currentText = nullptr;
 }
 
 void libcdr::CDRContentCollector::collectTransform(const CDRTransforms &transforms, bool considerGroupTransform)
@@ -510,15 +562,23 @@ void libcdr::CDRContentCollector::collectLevel(unsigned level)
   }
   while (!m_groupLevels.empty() && level <= m_groupLevels.top())
   {
-    librevenge::RVNGPropertyList propList;
     CDROutputElementList outputElement;
     // since the CDR objects are drawn in reverse order, reverse group marks too
-    outputElement.addStartGroup(propList);
-    m_outputElements->push(outputElement);
+    if (m_reverseOrder)
+    {
+      librevenge::RVNGPropertyList propList;
+      outputElement.addStartGroup(propList);
+      m_outputElementsStack->push(outputElement);
+    }
+    else
+    {
+      outputElement.addEndGroup();
+      m_outputElementsQueue->push(outputElement);
+    }
     m_groupLevels.pop();
     m_groupTransforms.pop();
   }
-  if (m_currentVectLevel && m_spnd && m_groupLevels.empty() && !m_fillOutputElements.empty())
+  if (m_currentVectLevel && m_spnd && m_groupLevels.empty() && (!m_fillOutputElementsStack.empty() || !m_fillOutputElementsQueue.empty()))
   {
     librevenge::RVNGStringVector svgOutput;
     librevenge::RVNGSVGDrawingGenerator generator(svgOutput, "");
@@ -526,11 +586,17 @@ void libcdr::CDRContentCollector::collectLevel(unsigned level)
     propList.insert("svg:width", m_page.width);
     propList.insert("svg:height", m_page.height);
     generator.startPage(propList);
-    while (!m_fillOutputElements.empty())
+    while (!m_fillOutputElementsStack.empty())
     {
-      m_fillOutputElements.top().draw(&generator);
-      m_fillOutputElements.pop();
+      m_fillOutputElementsStack.top().draw(&generator);
+      m_fillOutputElementsStack.pop();
     }
+    while (!m_fillOutputElementsQueue.empty())
+    {
+      m_fillOutputElementsQueue.front().draw(&generator);
+      m_fillOutputElementsQueue.pop();
+    }
+
     generator.endPage();
     if (!svgOutput.empty())
     {
@@ -561,7 +627,8 @@ void libcdr::CDRContentCollector::collectLevel(unsigned level)
   if (level <= m_currentVectLevel)
   {
     m_currentVectLevel = 0;
-    m_outputElements = &m_contentOutputElements;
+    m_outputElementsStack = &m_contentOutputElementsStack;
+    m_outputElementsQueue = &m_contentOutputElementsQueue;
     m_page = m_ps.m_pages[m_pageIndex ? m_pageIndex-1 : 0];
   }
   if (level <= m_currentPageLevel)
@@ -571,16 +638,18 @@ void libcdr::CDRContentCollector::collectLevel(unsigned level)
   }
 }
 
-void libcdr::CDRContentCollector::collectFillStyle(unsigned short fillType, const CDRColor &color1, const CDRColor &color2, const CDRGradient &gradient, const CDRImageFill &imageFill)
+void libcdr::CDRContentCollector::collectFillStyleId(unsigned id)
 {
-  m_currentFillStyle = CDRFillStyle(fillType, color1, color2, gradient, imageFill);
+  std::map<unsigned, CDRFillStyle>::const_iterator iter = m_ps.m_fillStyles.find(id);
+  if (iter != m_ps.m_fillStyles.end())
+    m_currentFillStyle = iter->second;
 }
 
-void libcdr::CDRContentCollector::collectLineStyle(unsigned short lineType, unsigned short capsType, unsigned short joinType, double lineWidth,
-                                                   double stretch, double angle, const CDRColor &color, const std::vector<unsigned> &dashArray,
-                                                   const CDRPath &startMarker, const CDRPath &endMarker)
+void libcdr::CDRContentCollector::collectLineStyleId(unsigned id)
 {
-  m_currentLineStyle = CDRLineStyle(lineType, capsType, joinType, lineWidth, stretch, angle, color, dashArray, startMarker, endMarker);
+  std::map<unsigned, CDRLineStyle>::const_iterator iter = m_ps.m_lineStyles.find(id);
+  if (iter != m_ps.m_lineStyles.end())
+    m_currentLineStyle = iter->second;
 }
 
 void libcdr::CDRContentCollector::collectRotate(double angle, double cx, double cy)
@@ -612,6 +681,13 @@ void libcdr::CDRContentCollector::collectPolygonTransform(unsigned numAngles, un
 
 void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &propList)
 {
+  if (m_currentFillStyle.fillType == (unsigned short)-1 && m_currentStyleId)
+  {
+    CDRStyle tmpStyle;
+    m_ps.getRecursedStyle(tmpStyle, m_currentStyleId);
+    m_currentFillStyle = tmpStyle.m_fillStyle;
+  }
+
   if (m_fillOpacity < 1.0)
     propList.insert("draw:opacity", m_fillOpacity, librevenge::RVNG_PERCENT);
   if (m_currentFillStyle.fillType == 0)
@@ -683,9 +759,8 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
               angle -= 360.0;
             propList.insert("draw:angle", (int)angle);
             librevenge::RVNGPropertyListVector vec;
-            for (unsigned i = 0; i < m_currentFillStyle.gradient.m_stops.size(); i++)
+            for (auto &gradStop : m_currentFillStyle.gradient.m_stops)
             {
-              libcdr::CDRGradientStop &gradStop = m_currentFillStyle.gradient.m_stops[i];
               librevenge::RVNGPropertyList stopElement;
               stopElement.insert("svg:offset", gradStop.m_offset, librevenge::RVNG_PERCENT);
               stopElement.insert("svg:stop-color", m_ps.getRGBColorString(gradStop.m_color));
@@ -708,9 +783,8 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
             angle -= 360.0;
           propList.insert("draw:angle", (int)angle);
           librevenge::RVNGPropertyListVector vec;
-          for (unsigned i = 0; i < m_currentFillStyle.gradient.m_stops.size(); i++)
+          for (auto &gradStop : m_currentFillStyle.gradient.m_stops)
           {
-            libcdr::CDRGradientStop &gradStop = m_currentFillStyle.gradient.m_stops[i];
             librevenge::RVNGPropertyList stopElement;
             stopElement.insert("svg:offset", gradStop.m_offset, librevenge::RVNG_PERCENT);
             stopElement.insert("svg:stop-color", m_ps.getRGBColorString(gradStop.m_color));
@@ -721,6 +795,7 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
         }
         break;
       case 7: // Pattern
+      case 8: // Pattern
       {
         std::map<unsigned, CDRPattern>::iterator iterPattern = m_ps.m_patterns.find(m_currentFillStyle.imageFill.id);
         if (iterPattern != m_ps.m_patterns.end())
@@ -740,7 +815,7 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
             fclose(f);
           }
 #endif
-          propList.insert("draw:fill-image", image.getBase64Data());
+          propList.insert("draw:fill-image", image);
           propList.insert("librevenge:mime-type", "image/bmp");
           propList.insert("style:repeat", "repeat");
           if (m_currentFillStyle.imageFill.isRelative)
@@ -773,19 +848,13 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
             if (m_fillTransforms.getTranslateX() != 0.0)
             {
               double xOffset = m_fillTransforms.getTranslateX() / m_currentFillStyle.imageFill.width;
-              while (xOffset < 0.0)
-                xOffset += 1.0;
-              while (xOffset > 1.0)
-                xOffset -= 1.0;
+              normalize(xOffset);
               propList.insert("draw:fill-image-ref-point-x", xOffset, librevenge::RVNG_PERCENT);
             }
             if (m_fillTransforms.getTranslateY() != 0.0)
             {
               double yOffset = m_fillTransforms.getTranslateY() / m_currentFillStyle.imageFill.width;
-              while (yOffset < 0.0)
-                yOffset += 1.0;
-              while (yOffset > 1.0)
-                yOffset -= 1.0;
+              normalize(yOffset);
               propList.insert("draw:fill-image-ref-point-y", 1.0 - yOffset, librevenge::RVNG_PERCENT);
             }
           }
@@ -807,7 +876,7 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
         {
           propList.insert("librevenge:mime-type", "image/bmp");
           propList.insert("draw:fill", "bitmap");
-          propList.insert("draw:fill-image", iterBmp->second.getBase64Data());
+          propList.insert("draw:fill-image", iterBmp->second);
           propList.insert("style:repeat", "repeat");
           if (m_currentFillStyle.imageFill.isRelative)
           {
@@ -867,7 +936,7 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
         {
           propList.insert("draw:fill", "bitmap");
           propList.insert("librevenge:mime-type", "image/svg+xml");
-          propList.insert("draw:fill-image", iterVect->second.getBase64Data());
+          propList.insert("draw:fill-image", iterVect->second);
           propList.insert("style:repeat", "repeat");
           if (m_currentFillStyle.imageFill.isRelative)
           {
@@ -930,12 +999,17 @@ void libcdr::CDRContentCollector::_fillProperties(librevenge::RVNGPropertyList &
 
 void libcdr::CDRContentCollector::_lineProperties(librevenge::RVNGPropertyList &propList)
 {
-  if (m_currentLineStyle.lineType == (unsigned short)-1)
+  if (m_currentLineStyle.lineType == (unsigned short)-1 && m_currentStyleId)
   {
-    propList.insert("draw:stroke", "solid");
-    propList.insert("svg:stroke-width", 0.0);
-    propList.insert("svg:stroke-color", "#000000");
+    CDRStyle tmpStyle;
+    m_ps.getRecursedStyle(tmpStyle, m_currentStyleId);
+    m_currentLineStyle = tmpStyle.m_lineStyle;
   }
+
+  if (m_currentLineStyle.lineType == (unsigned short)-1)
+    /* No line style specified and also no line style from the style id,
+       the shape has no outline then. */
+    propList.insert("draw:stroke", "none");
   else
   {
     if (m_currentLineStyle.lineType & 0x1)
@@ -1129,7 +1203,10 @@ void libcdr::CDRContentCollector::_generateBitmapFromPattern(librevenge::RVNGBin
     while (i <lineWidth && k < width)
     {
       unsigned l = 0;
-      unsigned char c = pattern.pattern[(j-1)*lineWidth+i];
+      unsigned char c = 0;
+      const unsigned index = (j-1)*lineWidth+i;
+      if (index < pattern.pattern.size())
+        c = pattern.pattern[index];
       i++;
       while (k < width && l < 8)
       {
@@ -1207,8 +1284,17 @@ void libcdr::CDRContentCollector::collectVectorPattern(unsigned id, const librev
   }
 #if DUMP_VECT
   librevenge::RVNGString filename;
-  filename.sprintf("vect%.8x.svg", id);
+  filename.sprintf("vect%.8x.cmx", id);
   FILE *f = fopen(filename.cstr(), "wb");
+  if (f)
+  {
+    const unsigned char *tmpBuffer = data.getDataBuffer();
+    for (unsigned long k = 0; k < data.size(); k++)
+      fprintf(f, "%c",tmpBuffer[k]);
+    fclose(f);
+  }
+  filename.sprintf("vect%.8x.svg", id);
+  f = fopen(filename.cstr(), "wb");
   if (f)
   {
     const unsigned char *tmpBuffer = m_ps.m_vects[id].getDataBuffer();
@@ -1237,6 +1323,11 @@ void libcdr::CDRContentCollector::collectParagraphText(double x, double y, doubl
   std::map<unsigned, std::vector<CDRTextLine> >::const_iterator iter = m_ps.m_texts.find(m_spnd);
   if (iter != m_ps.m_texts.end())
     m_currentText = &(iter->second);
+}
+
+void libcdr::CDRContentCollector::collectStyleId(unsigned styleId)
+{
+  m_currentStyleId = styleId;
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

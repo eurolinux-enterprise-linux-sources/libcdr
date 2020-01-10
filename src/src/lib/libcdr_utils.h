@@ -10,10 +10,16 @@
 #ifndef __LIBCDR_UTILS_H__
 #define __LIBCDR_UTILS_H__
 
-#include <stdio.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string>
 #include <math.h>
 #include <vector>
+
+#include <boost/cstdint.hpp>
+
 #include <librevenge-stream/librevenge-stream.h>
 #include <librevenge/librevenge.h>
 
@@ -24,52 +30,28 @@
 #define CDR_EPSILON 1E-6
 #define CDR_ALMOST_ZERO(m) (fabs(m) <= CDR_EPSILON)
 
-#ifdef _MSC_VER
-
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef short int16_t;
-typedef unsigned uint32_t;
-typedef int int32_t;
-typedef unsigned __int64 uint64_t;
-typedef __int64 int64_t;
-
+#if defined(HAVE_FUNC_ATTRIBUTE_FORMAT)
+#  define CDR_ATTRIBUTE_PRINTF(fmt, arg) __attribute__((__format__(__printf__, fmt, arg)))
 #else
-
-#ifdef HAVE_CONFIG_H
-
-#include <config.h>
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
+#  define CDR_ATTRIBUTE_PRINTF(fmt, arg)
 #endif
 
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-
+#if defined(HAVE_CLANG_ATTRIBUTE_FALLTHROUGH)
+#  define CDR_FALLTHROUGH [[clang::fallthrough]]
+#elif defined(HAVE_GCC_ATTRIBUTE_FALLTHROUGH)
+#  define CDR_FALLTHROUGH __attribute__((fallthrough))
 #else
-
-// assume that the headers are there inside LibreOffice build when no HAVE_CONFIG_H is defined
-#include <stdint.h>
-#include <inttypes.h>
-
+#  define CDR_FALLTHROUGH ((void) 0)
 #endif
-
-#endif
-
-// debug message includes source file and line number
-//#define VERBOSE_DEBUG 1
 
 // do nothing with debug messages in a release compile
 #ifdef DEBUG
-#ifdef VERBOSE_DEBUG
-#define CDR_DEBUG_MSG(M) printf("%15s:%5d: ", __FILE__, __LINE__); printf M
+namespace libcdr
+{
+void debugPrint(const char *format, ...) CDR_ATTRIBUTE_PRINTF(1, 2);
+}
+#define CDR_DEBUG_MSG(M) libcdr::debugPrint M
 #define CDR_DEBUG(M) M
-#else
-#define CDR_DEBUG_MSG(M) printf M
-#define CDR_DEBUG(M) M
-#endif
 #else
 #define CDR_DEBUG_MSG(M)
 #define CDR_DEBUG(M)
@@ -77,6 +59,11 @@ typedef __int64 int64_t;
 
 namespace libcdr
 {
+
+struct CDRDummyDeleter
+{
+  void operator()(void *) const {}
+};
 
 uint8_t readU8(librevenge::RVNGInputStream *input, bool bigEndian=false);
 uint16_t readU16(librevenge::RVNGInputStream *input, bool bigEndian=false);
@@ -88,6 +75,9 @@ int16_t readS16(librevenge::RVNGInputStream *input, bool bigEndian=false);
 double readDouble(librevenge::RVNGInputStream *input, bool bigEndian=false);
 
 double readFixedPoint(librevenge::RVNGInputStream *input, bool bigEndian=false);
+
+unsigned long getLength(librevenge::RVNGInputStream *input);
+unsigned long getRemainingLength(librevenge::RVNGInputStream *input);
 
 int cdr_round(double d);
 

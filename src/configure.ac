@@ -7,7 +7,7 @@ AC_PREREQ([2.65])
 # ====================
 m4_define([libcdr_version_major],[0])
 m4_define([libcdr_version_minor],[1])
-m4_define([libcdr_version_micro],[1])
+m4_define([libcdr_version_micro],[4])
 m4_define([libcdr_version],[libcdr_version_major.libcdr_version_minor.libcdr_version_micro])
 
 # =============
@@ -33,6 +33,10 @@ AC_PROG_MAKE_SET
 LT_INIT([win32-dll disable-static pic-only])
 AC_CANONICAL_HOST
 
+AX_CXX_COMPILE_STDCXX_11
+AX_GCC_FUNC_ATTRIBUTE([format])
+DLP_FALLTHROUGH
+
 PKG_PROG_PKG_CONFIG([0.20])
 
 # ===============
@@ -53,19 +57,35 @@ AC_ARG_ENABLE([tools],
 	[enable_tools="$enableval"],
 	[enable_tools=yes]
 )
-AS_IF([test "x$enable_tools" = "xyes"], [
+AM_CONDITIONAL(BUILD_TOOLS, [test "x$enable_tools" = "xyes"])
+AS_IF([test "x$enable_tools" = "xyes"], [need_stream=yes; need_generators=yes])
+
+# =======
+# Fuzzers
+# =======
+AC_ARG_ENABLE([fuzzers],
+	[AS_HELP_STRING([--enable-fuzzers], [Build fuzzer(s)])],
+	[enable_fuzzers="$enableval"],
+	[enable_fuzzers=no]
+)
+AM_CONDITIONAL(BUILD_FUZZERS, [test "x$enable_fuzzers" = "xyes"])
+AS_IF([test "x$enable_fuzzers" = "xyes"], [need_stream=yes; need_generators=yes])
+
+AS_IF([test "x$need_stream" = "xyes"], [
 	PKG_CHECK_MODULES([REVENGE_STREAM],[
 		librevenge-stream-0.0
-	])
-	PKG_CHECK_MODULES([REVENGE_GENERATORS],[
-		librevenge-generators-0.0
 	])
 ])
 AC_SUBST([REVENGE_STREAM_CFLAGS])
 AC_SUBST([REVENGE_STREAM_LIBS])
+
+AS_IF([test "x$need_generators" = "xyes"], [
+	PKG_CHECK_MODULES([REVENGE_GENERATORS],[
+		librevenge-generators-0.0
+	])
+])
 AC_SUBST([REVENGE_GENERATORS_CFLAGS])
 AC_SUBST([REVENGE_GENERATORS_LIBS])
-AM_CONDITIONAL(BUILD_TOOLS, [test "x$enable_tools" = "xyes"])
 
 # ==========
 # Find lcms2
@@ -91,21 +111,7 @@ AC_SUBST(ZLIB_LIBS)
 # ========
 # Find icu
 # ========
-AS_IF([test "${ICU_CFLAGS+set}" = set],[
-	ICU_CFLAGS_overriden=yes],[
-	ICU_CFLAGS_overriden=no])
-PKG_CHECK_MODULES([ICU],[icu-i18n],[
-	AS_IF([test "${ICU_CFLAGS_overriden}" = no], [
-		ICU_CFLAGS="${ICU_CFLAGS} `${PKG_CONFIG} icu-i18n --variable=CXXFLAGS`"])
-	], [
-	AC_PATH_PROG([ICU_CONFIG],[icu-config])
-	AC_MSG_CHECKING([ICU installation])
-	AS_IF([${ICU_CONFIG} --cflags >/dev/null 2>&1],[
-		ICU_CFLAGS=`${ICU_CONFIG} --cppflags-searchpath --cxxflags`
-		ICU_LIBS=`${ICU_CONFIG} --ldflags`
-		AC_MSG_RESULT([found])],[
-		AC_MSG_ERROR([libicu config program icu-config not found])])]
-)
+PKG_CHECK_MODULES([ICU], [icu-i18n])
 AC_SUBST(ICU_CFLAGS)
 AC_SUBST(ICU_LIBS)
 
@@ -115,11 +121,13 @@ AC_SUBST(ICU_LIBS)
 # ===========================
 
 AC_CHECK_HEADERS(
+	boost/algorithm/string.hpp \
+	boost/cstdint.hpp \
 	boost/optional.hpp \
+	boost/property_tree/json_parser.hpp \
 	boost/property_tree/ptree.hpp \
-	boost/scoped_ptr.hpp \
-	boost/spirit/include/classic.hpp \
-	boost/property_tree/json_parser.hpp,
+	boost/spirit/include/qi.hpp \
+        ,
 	[],
 	[AC_MSG_ERROR(Required boost headers not found. Install boost >= 1.41.0)],
 	[]
@@ -184,7 +192,7 @@ AS_CASE([$host],
 AC_MSG_RESULT([$platform_win32])
 AM_CONDITIONAL([PLATFORM_WIN32], [test "x$platform_win32" = "xyes"])
 
-AS_IF([test $platform_win32 == yes],
+AS_IF([test $platform_win32 = yes],
     [],
     [
         AC_MSG_CHECKING([for -fvisibility=hidden compiler flag])
@@ -207,7 +215,7 @@ AS_IF([test $platform_win32 == yes],
 # Check for cflags
 # ================
 AC_ARG_ENABLE([werror],
-	[AS_HELP_STRING([--disable-werror], [Treat all warnings as errors, usefull for development])],
+	[AS_HELP_STRING([--disable-werror], [Treat all warnings as errors, useful for development])],
 	[enable_werror="$enableval"],
 	[enable_werror=yes]
 )
@@ -216,7 +224,7 @@ AS_IF([test x"$enable_werror" != "xno"], [
 	CXXFLAGS="$CXXFLAGS -Werror"
 ])
 AC_ARG_ENABLE([weffc],
-	[AS_HELP_STRING([--disable-weffc], [ Disable -Weffc++ warnings, usefull when using an old version of gcc or of boost])],
+	[AS_HELP_STRING([--disable-weffc], [ Disable -Weffc++ warnings, useful when using an old version of gcc or of boost])],
 	[enable_weffc="$enableval"],
 	[enable_weffc=yes]
 )
@@ -294,6 +302,22 @@ AS_IF([test "x$enable_debug" = "xyes"], [
 ])
 AC_SUBST(DEBUG_CXXFLAGS)
 
+# ==========
+# Unit tests
+# ==========
+AC_ARG_ENABLE([tests],
+    [AS_HELP_STRING([--enable-tests], [Build and run unit tests])],
+    [enable_tests="$enableval"],
+    [enable_tests=yes]
+)
+AS_IF([test "x$enable_tests" = "xyes"], [
+    PKG_CHECK_MODULES([CPPUNIT], [cppunit])
+], [])
+AC_SUBST([CPPUNIT_CFLAGS])
+AC_SUBST([CPPUNIT_LIBS])
+AM_CONDITIONAL([BUILD_TESTS], [test "x$enable_tests" = "xyes"])
+AS_IF([test "x$enable_tests" = "xyes"], [need_stream=yes])
+
 # =============
 # Documentation
 # =============
@@ -330,8 +354,10 @@ src/conv/svg/cmx2xhtml.rc
 src/conv/text/Makefile
 src/conv/text/cdr2text.rc
 src/conv/text/cmx2text.rc
+src/fuzz/Makefile
 src/lib/Makefile
 src/lib/libcdr.rc
+src/test/Makefile
 build/Makefile
 build/win32/Makefile
 docs/Makefile
@@ -350,6 +376,8 @@ AC_MSG_NOTICE([
 Build configuration:
 	debug:           ${enable_debug}
 	docs:            ${build_docs}
+	fuzzers:         ${enable_fuzzers}
+	tests:           ${enable_tests}
 	tools:           ${enable_tools}
 	werror:          ${enable_werror}
 ==============================================================================

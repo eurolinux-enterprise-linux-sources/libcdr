@@ -7,6 +7,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <cassert>
+#include <cstdarg>
+#include <cstdio>
 #include <string.h>
 
 #include "libcdr_utils.h"
@@ -22,6 +25,7 @@
 
 namespace
 {
+
 static unsigned short getEncodingFromICUName(const char *name)
 {
   // ANSI
@@ -98,7 +102,7 @@ static unsigned short getEncoding(const unsigned char *buffer, unsigned bufferLe
   if (!buffer)
     return 0;
   UErrorCode status = U_ZERO_ERROR;
-  UCharsetDetector *csd = 0;
+  UCharsetDetector *csd = nullptr;
   try
   {
     csd = ucsdet_open(&status);
@@ -263,6 +267,42 @@ double libcdr::readFixedPoint(librevenge::RVNGInputStream *input, bool bigEndian
   return ((double)fixedPointNumberIntegerPart + fixedPointNumberFractionalPart);
 }
 
+unsigned long libcdr::getLength(librevenge::RVNGInputStream *const input)
+{
+  if (!input)
+    throw EndOfStreamException();
+
+  const long orig = input->tell();
+  long end = 0;
+
+  if (input->seek(0, librevenge::RVNG_SEEK_END) == 0)
+  {
+    end = input->tell();
+  }
+  else
+  {
+    // RVNG_SEEK_END does not work. Use the harder way.
+    if (input->seek(0, librevenge::RVNG_SEEK_SET) != 0)
+      throw EndOfStreamException();
+    while (!input->isEnd())
+    {
+      readU8(input);
+      ++end;
+    }
+  }
+  assert(end >= 0);
+
+  if (input->seek(orig, librevenge::RVNG_SEEK_SET) != 0)
+    throw EndOfStreamException();
+
+  return static_cast<unsigned long>(end);
+}
+
+unsigned long libcdr::getRemainingLength(librevenge::RVNGInputStream *const input)
+{
+  return getLength(input) - static_cast<unsigned long>(input->tell());
+}
+
 int libcdr::cdr_round(double d)
 {
   return (d>0) ? int(d+0.5) : int(d-0.5);
@@ -337,7 +377,7 @@ void libcdr::appendCharacters(librevenge::RVNGString &text, std::vector<unsigned
   else
   {
     UErrorCode status = U_ZERO_ERROR;
-    UConverter *conv = NULL;
+    UConverter *conv = nullptr;
     switch (charset)
     {
     case 0x80: // SHIFTJIS
@@ -423,6 +463,15 @@ void libcdr::appendCharacters(librevenge::RVNGString &text, std::vector<unsigned
 }
 
 #ifdef DEBUG
+
+void libcdr::debugPrint(const char *const format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  std::vfprintf(stderr, format, args);
+  va_end(args);
+}
+
 const char *libcdr::toFourCC(unsigned value, bool bigEndian)
 {
   static char sValue[5] = { 0, 0, 0, 0, 0 };

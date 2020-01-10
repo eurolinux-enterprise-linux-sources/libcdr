@@ -40,6 +40,9 @@ public:
   std::vector<CDRPage> m_pages;
   std::map<unsigned, CDRColor> m_documentPalette;
   std::map<unsigned, std::vector<CDRTextLine> > m_texts;
+  std::map<unsigned, CDRStyle> m_styles;
+  std::map<unsigned, CDRFillStyle> m_fillStyles;
+  std::map<unsigned, CDRLineStyle> m_lineStyles;
 
   unsigned _getRGBColor(const CDRColor &color);
   unsigned getBMPColor(const CDRColor &color);
@@ -50,6 +53,7 @@ public:
 
   void setColorTransform(const std::vector<unsigned char> &profile);
   void setColorTransform(librevenge::RVNGInputStream *input);
+  void getRecursedStyle(CDRStyle &style, unsigned styleId);
 
 private:
   CDRParserState(const CDRParserState &);
@@ -71,10 +75,10 @@ public:
   virtual void collectPath(const CDRPath &path) = 0;
   virtual void collectLevel(unsigned level) = 0;
   virtual void collectTransform(const CDRTransforms &transforms, bool considerGroupTransform) = 0;
-  virtual void collectFillStyle(unsigned short fillType, const CDRColor &color1, const CDRColor &color2, const CDRGradient &gradient, const CDRImageFill &imageFill) = 0;
-  virtual void collectLineStyle(unsigned short lineType, unsigned short capsType, unsigned short joinType, double lineWidth,
-                                double stretch, double angle, const CDRColor &color, const std::vector<unsigned> &dashArray,
-                                const CDRPath &startMarker, const CDRPath &endMarker) = 0;
+  virtual void collectFillStyle(unsigned id, const CDRFillStyle &fillStyle) = 0;
+  virtual void collectFillStyleId(unsigned id) = 0;
+  virtual void collectLineStyle(unsigned id, const CDRLineStyle &lineStyle) = 0;
+  virtual void collectLineStyleId(unsigned id) = 0;
   virtual void collectRotate(double angle, double cx, double cy) = 0;
   virtual void collectFlags(unsigned flags, bool considerFlags) = 0;
   virtual void collectPageSize(double width, double height, double offsetX, double offsetY) = 0;
@@ -94,10 +98,11 @@ public:
   virtual void collectVectorPattern(unsigned id, const librevenge::RVNGBinaryData &data) = 0;
   virtual void collectPaletteEntry(unsigned colorId, unsigned userId, const CDRColor &color) = 0;
   virtual void collectText(unsigned textId, unsigned styleId, const std::vector<unsigned char> &data,
-                           const std::vector<unsigned char> &charDescriptions, const std::map<unsigned, CDRCharacterStyle> &styleOverrides) = 0;
+                           const std::vector<unsigned char> &charDescriptions, const std::map<unsigned, CDRStyle> &styleOverrides) = 0;
   virtual void collectArtisticText(double x, double y) = 0;
   virtual void collectParagraphText(double x, double y, double width, double height) = 0;
-  virtual void collectStld(unsigned id, const CDRCharacterStyle &charStyle) = 0;
+  virtual void collectStld(unsigned id, const CDRStyle &style) = 0;
+  virtual void collectStyleId(unsigned id) = 0;
 };
 
 } // namespace libcdr

@@ -100,7 +100,7 @@ const unsigned char *libcdr::CDRInternalStream::read(unsigned long numBytes, uns
   numBytesRead = 0;
 
   if (numBytes == 0)
-    return 0;
+    return nullptr;
 
   unsigned numBytesToRead;
 
@@ -112,7 +112,7 @@ const unsigned char *libcdr::CDRInternalStream::read(unsigned long numBytes, uns
   numBytesRead = numBytesToRead; // about as paranoid as we can be..
 
   if (numBytesToRead == 0)
-    return 0;
+    return nullptr;
 
   long oldOffset = m_offset;
   m_offset += numBytesToRead;
@@ -126,6 +126,8 @@ int libcdr::CDRInternalStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seek
     m_offset += offset;
   else if (seekType == librevenge::RVNG_SEEK_SET)
     m_offset = offset;
+  else if (seekType == librevenge::RVNG_SEEK_END)
+    m_offset = long(static_cast<unsigned long>(m_buffer.size())) + offset;
 
   if (m_offset < 0)
   {

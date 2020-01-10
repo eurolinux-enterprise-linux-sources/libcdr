@@ -7,13 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <string.h>
 #include <librevenge-stream/librevenge-stream.h>
 #include "libcdr_utils.h"
 #include "CommonParser.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 libcdr::CommonParser::CommonParser(libcdr::CDRCollector *collector)
   : m_collector(collector), m_precision(libcdr::PRECISION_UNKNOWN) {}
@@ -130,6 +127,73 @@ void libcdr::CommonParser::processPath(const std::vector<std::pair<double, doubl
       tmpPoints.push_back(points[k]);
     }
   }
+}
+
+void libcdr::CommonParser::readRImage(unsigned &colorModel, unsigned &width, unsigned &height, unsigned &bpp,
+                                      std::vector<unsigned> &palette, std::vector<unsigned char> &bitmap,
+                                      librevenge::RVNGInputStream *input, bool bigEndian)
+{
+  colorModel = readU32(input, bigEndian);
+  input->seek(4, librevenge::RVNG_SEEK_CUR);
+  width = readU32(input, bigEndian);
+  height = readU32(input, bigEndian);
+  input->seek(4, librevenge::RVNG_SEEK_CUR);
+  bpp = readU32(input, bigEndian);
+  input->seek(4, librevenge::RVNG_SEEK_CUR);
+  unsigned bmpsize = readU32(input, bigEndian);
+  input->seek(32, librevenge::RVNG_SEEK_CUR);
+  if (bpp < 24 && colorModel != 5 && colorModel != 6)
+  {
+    palette.clear();
+    input->seek(2, librevenge::RVNG_SEEK_CUR);
+    unsigned short palettesize = readU16(input);
+    if (palettesize > getRemainingLength(input) / 3)
+      palettesize = getRemainingLength(input) / 3;
+    palette.reserve(palettesize);
+    for (unsigned short i = 0; i <palettesize; ++i)
+    {
+      unsigned b = readU8(input);
+      unsigned g = readU8(input);
+      unsigned r = readU8(input);
+      palette.push_back(b | (g << 8) | (r << 16));
+    }
+  }
+  if (bmpsize == 0)
+    return;
+  unsigned long tmpNumBytesRead = 0;
+  const unsigned char *tmpBuffer = input->read(bmpsize, tmpNumBytesRead);
+  if (bmpsize != tmpNumBytesRead)
+    return;
+  bitmap.clear();
+  bitmap.resize(bmpsize);
+  memcpy(&bitmap[0], tmpBuffer, bmpsize);
+}
+
+void libcdr::CommonParser::readBmpPattern(unsigned &width, unsigned &height, std::vector<unsigned char> &pattern,
+                                          unsigned length, librevenge::RVNGInputStream *input, bool bigEndian)
+{
+  unsigned headerLength = readU32(input);
+  if (headerLength != 40)
+    return;
+  width = readU32(input, bigEndian);
+  height = readU32(input, bigEndian);
+  input->seek(2, librevenge::RVNG_SEEK_CUR);
+  unsigned bpp = readU16(input);
+  if (bpp != 1)
+    return;
+  input->seek(4, librevenge::RVNG_SEEK_CUR); // compression
+  unsigned dataSize = readU32(input, bigEndian);
+  if (dataSize == 0)
+    return;
+  CDR_DEBUG_MSG(("CommonParser::readBmpPattern - offset of pixel data %i\n", length - dataSize - 24));
+  input->seek(length - dataSize - 24, librevenge::RVNG_SEEK_CUR);
+  unsigned long tmpNumBytesRead = 0;
+  const unsigned char *tmpBuffer = input->read(dataSize, tmpNumBytesRead);
+  if (dataSize != tmpNumBytesRead)
+    return;
+  pattern.clear();
+  pattern.resize(dataSize);
+  memcpy(&pattern[0], tmpBuffer, dataSize);
 }
 
 

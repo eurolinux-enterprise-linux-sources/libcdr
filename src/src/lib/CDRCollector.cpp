@@ -9,18 +9,20 @@
 
 #include <math.h>
 #include <string.h>
+#include <lcms2.h>
 #include "CDRCollector.h"
 #include "libcdr_utils.h"
 
 libcdr::CDRParserState::CDRParserState()
   : m_bmps(), m_patterns(), m_vects(), m_pages(), m_documentPalette(), m_texts(),
-    m_colorTransformCMYK2RGB(0), m_colorTransformLab2RGB(0), m_colorTransformRGB2RGB(0)
+    m_styles(), m_fillStyles(), m_lineStyles(),
+    m_colorTransformCMYK2RGB(nullptr), m_colorTransformLab2RGB(nullptr), m_colorTransformRGB2RGB(nullptr)
 {
   cmsHPROFILE tmpRGBProfile = cmsCreate_sRGBProfile();
   m_colorTransformRGB2RGB = cmsCreateTransform(tmpRGBProfile, TYPE_RGB_8, tmpRGBProfile, TYPE_RGB_8, INTENT_PERCEPTUAL, 0);
   cmsHPROFILE tmpCMYKProfile = cmsOpenProfileFromMem(CMYK_icc, sizeof(CMYK_icc)/sizeof(CMYK_icc[0]));
   m_colorTransformCMYK2RGB = cmsCreateTransform(tmpCMYKProfile, TYPE_CMYK_DBL, tmpRGBProfile, TYPE_RGB_8, INTENT_PERCEPTUAL, 0);
-  cmsHPROFILE tmpLabProfile = cmsCreateLab4Profile(0);
+  cmsHPROFILE tmpLabProfile = cmsCreateLab4Profile(nullptr);
   m_colorTransformLab2RGB = cmsCreateTransform(tmpLabProfile, TYPE_Lab_DBL, tmpRGBProfile, TYPE_RGB_8, INTENT_PERCEPTUAL, 0);
   cmsCloseProfile(tmpLabProfile);
   cmsCloseProfile(tmpCMYKProfile);
@@ -469,6 +471,14 @@ unsigned libcdr::CDRParserState::_getRGBColor(const CDRColor &color)
     }
     break;
   }
+  // BW
+  case 0x08:
+  {
+    red = col0 ? 0 : 0xff;
+    green = col0 ? 0 : 0xff;
+    blue = col0 ? 0 : 0xff;
+    break;
+  }
   // Grayscale
   case 0x09:
   {
@@ -565,6 +575,33 @@ librevenge::RVNGString libcdr::CDRParserState::getRGBColorString(const libcdr::C
   librevenge::RVNGString tempString;
   tempString.sprintf("#%.6x", _getRGBColor(color));
   return tempString;
+}
+
+void libcdr::CDRParserState::getRecursedStyle(CDRStyle &style, unsigned styleId)
+{
+  std::map<unsigned, CDRStyle>::const_iterator iter = m_styles.find(styleId);
+  if (iter == m_styles.end())
+    return;
+
+  std::stack<CDRStyle> styleStack;
+  styleStack.push(iter->second);
+  if (iter->second.m_parentId)
+  {
+    std::map<unsigned, CDRStyle>::const_iterator iter2 = m_styles.find(iter->second.m_parentId);
+    while (iter2 != m_styles.end())
+    {
+      styleStack.push(iter2->second);
+      if (iter2->second.m_parentId)
+        iter2 = m_styles.find(iter2->second.m_parentId);
+      else
+        iter2 = m_styles.end();
+    }
+  }
+  while (!styleStack.empty())
+  {
+    style.overrideStyle(styleStack.top());
+    styleStack.pop();
+  }
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

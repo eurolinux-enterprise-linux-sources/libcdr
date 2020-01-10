@@ -39,6 +39,7 @@
 #define CDR_FOURCC_cont 0x746e6f63
 #define CDR_FOURCC_CPng 0x676e5043
 
+#define CDR_FOURCC_data 0x61746164
 #define CDR_FOURCC_digk 0x6b676964
 #define CDR_FOURCC_DISP 0x50534944
 #define CDR_FOURCC_doc  0x20636f64
@@ -61,6 +62,15 @@
 
 #define CDR_FOURCC_iccd 0x64636369
 #define CDR_FOURCC_iccp 0x70636369
+#define CDR_FOURCC_imag 0x67616d69
+#define CDR_FOURCC_indx 0x78646e69
+#define CDR_FOURCC_info 0x6f666e69
+#define CDR_FOURCC_ixef 0x66657869
+#define CDR_FOURCC_ixlr 0x726c7869
+#define CDR_FOURCC_ixmr 0x726d7869
+#define CDR_FOURCC_ixpc 0x63707869
+#define CDR_FOURCC_ixpg 0x67707869
+#define CDR_FOURCC_ixtl 0x6c747869
 #define CDR_FOURCC_ICMT 0x544d4349
 #define CDR_FOURCC_IKEY 0x59454b49
 #define CDR_FOURCC_INFO 0x4f464e49
@@ -73,6 +83,7 @@
 #define CDR_FOURCC_loda 0x61646f6c
 #define CDR_FOURCC_lobj 0x6a626f6c
 
+#define CDR_FOURCC_mask 0x6b73616d
 #define CDR_FOURCC_mcfg 0x6766636d
 
 #define CDR_FOURCC_npps 0x7370706e
@@ -88,10 +99,20 @@
 #define CDR_FOURCC_ppdt 0x74647070
 #define CDR_FOURCC_ppid 0x64697070
 #define CDR_FOURCC_pref 0x66657270
+#define CDR_FOURCC_proc 0x636f7270
 #define CDR_FOURCC_ptrt 0x74727470
 
 #define CDR_FOURCC_RIFF 0x46464952
 #define CDR_FOURCC_RIFX 0x58464952
+#define CDR_FOURCC_rarw 0x77726172
+#define CDR_FOURCC_rclr 0x726c6372
+#define CDR_FOURCC_rdot 0x746f6472
+#define CDR_FOURCC_rlst 0x74736c72
+#define CDR_FOURCC_rota 0x61746f72
+#define CDR_FOURCC_rotl 0x6c746f72
+#define CDR_FOURCC_rott 0x74746f72
+#define CDR_FOURCC_rpen 0x6e657072
+#define CDR_FOURCC_rscr 0x72637372
 #define CDR_FOURCC_rvsn 0x6e737672
 
 #define CDR_FOURCC_spnd 0x646e7073

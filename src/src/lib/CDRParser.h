@@ -28,7 +28,7 @@ class CDRParser : protected CommonParser
 {
 public:
   explicit CDRParser(const std::vector<librevenge::RVNGInputStream *> &externalStreams, CDRCollector *collector);
-  virtual ~CDRParser();
+  ~CDRParser() override;
   bool parseRecords(librevenge::RVNGInputStream *input, const std::vector<unsigned> &blockLengths = std::vector<unsigned>(), unsigned level = 0);
   bool parseWaldo(librevenge::RVNGInputStream *input);
 
@@ -94,7 +94,7 @@ private:
   void readParagraphText(librevenge::RVNGInputStream *input);
 
   bool _redirectX6Chunk(librevenge::RVNGInputStream **input, unsigned &length);
-  void _readX6StyleString(librevenge::RVNGInputStream *input, unsigned length, CDRCharacterStyle &style);
+  void _readX6StyleString(librevenge::RVNGInputStream *input, unsigned length, CDRStyle &style);
 
   std::vector<librevenge::RVNGInputStream *> m_externalStreams;
 
@@ -104,6 +104,8 @@ private:
   std::map<unsigned, CDRPath> m_arrows;
 
   unsigned m_version;
+  unsigned m_waldoOutlId;
+  unsigned m_waldoFillId;
 
 };
 

@@ -13,17 +13,13 @@
 #include "CDRInternalStream.h"
 #include "libcdr_utils.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 #ifndef DUMP_IMAGE
 #define DUMP_IMAGE 0
 #endif
 
 
 libcdr::CDRStylesCollector::CDRStylesCollector(libcdr::CDRParserState &ps) :
-  m_ps(ps), m_page(8.5, 11.0, -4.25, -5.5), m_charStyles()
+  m_ps(ps), m_page(8.5, 11.0, -4.25, -5.5)
 {
 }
 
@@ -35,6 +31,9 @@ void libcdr::CDRStylesCollector::collectBmp(unsigned imageId, unsigned colorMode
 {
   libcdr::CDRInternalStream stream(bitmap);
   librevenge::RVNGBinaryData image;
+
+  if (height == 0)
+    height = 1;
 
   unsigned tmpPixelSize = (unsigned)(height * width);
   if (tmpPixelSize < (unsigned)height) // overflow
@@ -211,25 +210,25 @@ void libcdr::CDRStylesCollector::collectPaletteEntry(unsigned colorId, unsigned 
 }
 
 void libcdr::CDRStylesCollector::collectText(unsigned textId, unsigned styleId, const std::vector<unsigned char> &data,
-                                             const std::vector<unsigned char> &charDescriptions, const std::map<unsigned, CDRCharacterStyle> &styleOverrides)
+                                             const std::vector<unsigned char> &charDescriptions, const std::map<unsigned, CDRStyle> &styleOverrides)
 {
-  if (data.empty() || charDescriptions.empty())
+  if (data.empty() && styleOverrides.empty())
     return;
 
   unsigned char tmpCharDescription = 0;
   unsigned i = 0;
   unsigned j = 0;
   std::vector<unsigned char> tmpTextData;
-  CDRCharacterStyle defaultCharStyle, tmpCharStyle;
-  getRecursedStyle(defaultCharStyle, styleId);
+  CDRStyle defaultCharStyle, tmpCharStyle;
+  m_ps.getRecursedStyle(defaultCharStyle, styleId);
 
   CDRTextLine line;
   for (i=0, j=0; i<charDescriptions.size() && j<data.size(); ++i)
   {
     tmpCharStyle = defaultCharStyle;
-    std::map<unsigned, CDRCharacterStyle>::const_iterator iter = styleOverrides.find(tmpCharDescription & 0xfe);
+    std::map<unsigned, CDRStyle>::const_iterator iter = styleOverrides.find(tmpCharDescription & 0xfe);
     if (iter != styleOverrides.end())
-      tmpCharStyle.overrideCharacterStyle(iter->second);
+      tmpCharStyle.overrideStyle(iter->second);
     if (charDescriptions[i] != tmpCharDescription)
     {
       librevenge::RVNGString text;
@@ -249,51 +248,34 @@ void libcdr::CDRStylesCollector::collectText(unsigned textId, unsigned styleId, 
     if ((tmpCharDescription & 0x01) && (j < data.size()))
       tmpTextData.push_back(data[j++]);
   }
+  librevenge::RVNGString text;
   if (!tmpTextData.empty())
   {
-    librevenge::RVNGString text;
     if (tmpCharDescription & 0x01)
       appendCharacters(text, tmpTextData);
     else
       appendCharacters(text, tmpTextData, tmpCharStyle.m_charSet);
-    line.append(CDRText(text, tmpCharStyle));
-    CDR_DEBUG_MSG(("CDRStylesCollector::collectText - Text: %s\n", text.cstr()));
   }
+  line.append(CDRText(text, tmpCharStyle));
+  CDR_DEBUG_MSG(("CDRStylesCollector::collectText - Text: %s\n", text.cstr()));
 
   std::vector<CDRTextLine> &paragraphVector = m_ps.m_texts[textId];
   paragraphVector.push_back(line);
 }
 
-void libcdr::CDRStylesCollector::collectStld(unsigned id, const CDRCharacterStyle &charStyle)
+void libcdr::CDRStylesCollector::collectStld(unsigned id, const CDRStyle &style)
 {
-  m_charStyles[id] = charStyle;
+  m_ps.m_styles[id] = style;
 }
 
-void libcdr::CDRStylesCollector::getRecursedStyle(CDRCharacterStyle &charStyle, unsigned styleId)
+void libcdr::CDRStylesCollector::collectFillStyle(unsigned id, const CDRFillStyle &fillStyle)
 {
-  std::map<unsigned, CDRCharacterStyle>::const_iterator iter = m_charStyles.find(styleId);
-  if (iter == m_charStyles.end())
-    return;
+  m_ps.m_fillStyles[id] = fillStyle;
+}
 
-  std::stack<CDRCharacterStyle> styleStack;
-  styleStack.push(iter->second);
-  if (iter->second.m_parentId)
-  {
-    std::map<unsigned, CDRCharacterStyle>::const_iterator iter2 = m_charStyles.find(iter->second.m_parentId);
-    while (iter2 != m_charStyles.end())
-    {
-      styleStack.push(iter2->second);
-      if (iter2->second.m_parentId)
-        iter2 = m_charStyles.find(iter2->second.m_parentId);
-      else
-        iter2 = m_charStyles.end();
-    }
-  }
-  while (!styleStack.empty())
-  {
-    charStyle.overrideCharacterStyle(styleStack.top());
-    styleStack.pop();
-  }
+void libcdr::CDRStylesCollector::collectLineStyle(unsigned id, const CDRLineStyle &lineStyle)
+{
+  m_ps.m_lineStyles[id] = lineStyle;
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

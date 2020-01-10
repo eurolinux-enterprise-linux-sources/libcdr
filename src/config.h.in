@@ -1,5 +1,11 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <boost/algorithm/string.hpp> header file. */
+#undef HAVE_BOOST_ALGORITHM_STRING_HPP
+
+/* Define to 1 if you have the <boost/cstdint.hpp> header file. */
+#undef HAVE_BOOST_CSTDINT_HPP
+
 /* Define to 1 if you have the <boost/optional.hpp> header file. */
 #undef HAVE_BOOST_OPTIONAL_HPP
 
@@ -10,15 +16,23 @@
 /* Define to 1 if you have the <boost/property_tree/ptree.hpp> header file. */
 #undef HAVE_BOOST_PROPERTY_TREE_PTREE_HPP
 
-/* Define to 1 if you have the <boost/scoped_ptr.hpp> header file. */
-#undef HAVE_BOOST_SCOPED_PTR_HPP
+/* Define to 1 if you have the <boost/spirit/include/qi.hpp> header file. */
+#undef HAVE_BOOST_SPIRIT_INCLUDE_QI_HPP
 
-/* Define to 1 if you have the <boost/spirit/include/classic.hpp> header file.
-   */
-#undef HAVE_BOOST_SPIRIT_INCLUDE_CLASSIC_HPP
+/* Define to 1 if the system has the clang-style `fallthrough' attribute */
+#undef HAVE_CLANG_ATTRIBUTE_FALLTHROUGH
+
+/* define if the compiler supports basic C++11 syntax */
+#undef HAVE_CXX11
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Define to 1 if the system has the `format' function attribute */
+#undef HAVE_FUNC_ATTRIBUTE_FORMAT
+
+/* Define to 1 if the system has the GNU-style `fallthrough' attribute */
+#undef HAVE_GCC_ATTRIBUTE_FALLTHROUGH
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -47,8 +61,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Name of package */
