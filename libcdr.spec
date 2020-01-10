@@ -2,7 +2,7 @@
 
 Name: libcdr
 Version: 0.0.14
-Release: 1%{?dist}
+Release: 3%{?dist}
 Summary: A library providing ability to interpret and import Corel Draw drawings
 
 Group: System Environment/Libraries
@@ -102,6 +102,12 @@ rm -f %{buildroot}/%{_libdir}/*.la
 
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 0.0.14-3
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 0.0.14-2
+- Mass rebuild 2013-12-27
+
 * Fri May 17 2013 David Tardon <dtardon@redhat.com> - 0.0.14-1
 - new release
 
